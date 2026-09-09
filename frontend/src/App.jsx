@@ -27,7 +27,7 @@ import { MallDashboard } from './components/mall_admin/MallDashboard';
 import { DeliveryDashboard } from './components/delivery/DeliveryDashboard';
 import { LandingPage } from './components/landing/LandingPage';
 
-import { Sparkles, Star, Flame, Filter } from 'lucide-react';
+import { Sparkles, Star, Flame, Filter, Zap, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 const CustomerHub = ({ onOpenSearch, onOpenHistory, selectedRestaurant, setSelectedRestaurant, customerView, setCustomerView }) => {
   const { restaurants, currentTable } = useMall();
@@ -73,7 +73,7 @@ const CustomerHub = ({ onOpenSearch, onOpenHistory, selectedRestaurant, setSelec
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-200">
+    <div className="space-y-10 animate-in fade-in duration-300">
       
       {/* 1. Hero Table Scan Banner */}
       <TableScanBanner onExploreClick={() => {
@@ -81,48 +81,62 @@ const CustomerHub = ({ onOpenSearch, onOpenHistory, selectedRestaurant, setSelec
         if (el) el.scrollIntoView({ behavior: 'smooth' });
       }} />
 
-      {/* 2. "What's on your mind?" Category Circles (Matches Swiggy Screenshot) */}
+      {/* 2. "What's on your mind?" Category Circles */}
       <FoodCategoryCarousel
         selectedCategory={selectedCategory}
         onSelectCategory={(cat) => setSelectedCategory(cat)}
       />
 
-      {/* 3. AI Multi-Outlet Combo Highlight Banner */}
-      <div className="bg-gradient-to-r from-brand-500 via-amber-500 to-orange-500 rounded-3xl p-5 sm:p-6 text-white shadow-soft flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0">
-            <Sparkles className="w-6 h-6" />
+      {/* 3. AI Multi-Outlet Combo Highlight Banner (Luxury Design) */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-950 via-brand-950 to-slate-950 p-6 sm:p-8 text-white shadow-elevated border border-brand-500/30">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+          <div className="flex items-start gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-500 to-amber-400 flex items-center justify-center text-white shrink-0 shadow-lg shadow-brand-500/30">
+              <Sparkles className="w-7 h-7 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="bg-brand-500/30 border border-brand-400/40 text-amber-300 text-[10px] uppercase font-black px-2.5 py-0.5 rounded-full tracking-wider">
+                  ⚡ AI Smart Saver
+                </span>
+                <span className="text-emerald-400 text-xs font-bold flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Single Payment
+                </span>
+              </div>
+              <h3 className="font-black text-xl sm:text-2xl text-white font-display tracking-tight leading-tight">
+                Order Burger + Pizza + Iced Coffee & Save ₹50
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-300 font-medium mt-1 max-w-xl">
+                Combine items from multiple food outlets in 1 unified cart. Delivered together at <strong className="text-amber-300">Table {currentTable.number}</strong>!
+              </p>
+            </div>
           </div>
-          <div>
-            <span className="bg-white/25 text-[10px] uppercase font-black px-2.5 py-0.5 rounded-full tracking-wider inline-block mb-1">
-              AI Multi-Store Saver
-            </span>
-            <h3 className="font-black text-lg text-white leading-tight">
-              Order Burger + Pizza + Cold Coffee & Save ₹50
-            </h3>
-            <p className="text-xs text-white/90 font-medium mt-0.5">
-              Combine items from Burger House & Pizza Corner in 1 cart. Delivered together at Table {currentTable.number}!
-            </p>
-          </div>
-        </div>
 
-        <button
-          onClick={onOpenSearch}
-          className="bg-white text-slate-900 hover:bg-slate-50 font-black text-xs px-5 py-2.5 rounded-xl shadow-md transition-transform active:scale-95 shrink-0"
-        >
-          Try AI Combos
-        </button>
+          <button
+            onClick={onOpenSearch}
+            className="flex items-center gap-2 bg-gradient-to-r from-brand-500 via-orange-500 to-amber-500 hover:from-brand-400 hover:to-amber-400 text-white font-black text-xs sm:text-sm px-6 py-3.5 rounded-2xl shadow-lg shadow-brand-500/30 transition-all hover:scale-105 active:scale-95 shrink-0 shine-effect font-display"
+          >
+            <span>Try AI Smart Combos</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      {/* 4. Top Restaurant Chains in Food Court (Matches Swiggy Screenshot) */}
-      <div id="restaurants-grid">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+      {/* 4. Top Restaurant Chains in Food Court */}
+      <div id="restaurants-grid" className="pt-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              Top Food Outlets in Mall Food Court
-            </h2>
-            <p className="text-xs text-slate-500 font-medium">
-              All 6 participating restaurants accept combined multi-store orders for Table {currentTable.number}
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl sm:text-2xl font-black text-slate-950 font-display tracking-tight">
+                Top Food Outlets in Food Court
+              </h2>
+              <span className="bg-brand-100 text-brand-700 text-xs font-black px-2.5 py-0.5 rounded-full">
+                {filteredRestaurants.length} Outlets
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              Order from any outlet in 1 single combined cart for Table {currentTable.number}
             </p>
           </div>
 
@@ -130,21 +144,21 @@ const CustomerHub = ({ onOpenSearch, onOpenHistory, selectedRestaurant, setSelec
           <div className="flex items-center gap-2 overflow-x-auto max-w-full pb-1">
             <button
               onClick={() => setFilterType('all')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${filterType === 'all' ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+              className={`px-4 py-2 rounded-2xl text-xs font-black transition-all ${filterType === 'all' ? 'bg-slate-950 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
             >
               All Outlets
             </button>
             <button
               onClick={() => setFilterType('veg')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${filterType === 'veg' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+              className={`px-4 py-2 rounded-2xl text-xs font-black transition-all ${filterType === 'veg' ? 'bg-emerald-600 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
             >
               Pure Veg Only
             </button>
             <button
               onClick={() => setFilterType('rating')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 ${filterType === 'rating' ? 'bg-amber-500 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+              className={`px-4 py-2 rounded-2xl text-xs font-black transition-all flex items-center gap-1.5 ${filterType === 'rating' ? 'bg-amber-500 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
             >
-              <Star className="w-3 h-3 fill-current" />
+              <Star className="w-3.5 h-3.5 fill-current" />
               <span>Ratings 4.6+</span>
             </button>
           </div>

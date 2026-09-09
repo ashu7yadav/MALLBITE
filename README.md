@@ -38,20 +38,36 @@
 
 ---
 
+## 🚀 Deployment
+
+MALLBITE is pre-configured for **1-click deployment** on multiple platforms. For full details, see the **[Deployment Guide](DEPLOYMENT.md)**.
+
+### Quick Deploy:
+- **Vercel (Serverless Fullstack)**: Import repo to [Vercel](https://vercel.com/new) and click Deploy. Pre-configured with `vercel.json` and `/api` serverless handler.
+- **Render (Fullstack Service)**: Connect repository on [Render](https://render.com) using `npm run build` and `npm start`.
+- **Docker**: Run `docker build -t mallbite .` and `docker run -p 5000:5000 mallbite`.
+
+---
+
 ## 🛠️ Running Locally
 
-### 1. Start Backend Server:
+### Development Mode:
+
 ```bash
-cd backend
-npm install
-npm start
-# Server runs on http://localhost:5000
+# 1. Install all dependencies
+npm run install:all
+
+# 2. Start Backend Server (runs on http://localhost:5000)
+npm run dev:backend
+
+# 3. In another terminal, start Frontend App (runs on http://localhost:3000)
+npm run dev:frontend
 ```
 
-### 2. Start Frontend App:
+### Production Mode Test:
+
 ```bash
-cd frontend
-npm install
-npm run dev
-# App runs on http://localhost:3000
+# Build & start unified fullstack app on http://localhost:5000
+npm run build
+npm start
 ```

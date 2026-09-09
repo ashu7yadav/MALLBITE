@@ -1,5 +1,19 @@
 export const initialMalls = [
   {
+    id: "mall-city",
+    name: "City Center Mall Food Court",
+    city: "Metro City",
+    location: "Level 3 Grand Food Atrium, City Center",
+    zones: [
+      { id: "zone-a", name: "Zone A (North Food Atrium)", tables: ["A-01", "A-02", "A-03", "A-04", "A-05", "A-10", "A-12", "A-15", "A-20", "A-24", "A-25"] },
+      { id: "zone-b", name: "Zone B (Central Dome Dining)", tables: ["B-01", "B-02", "B-05", "B-08", "B-10", "B-12", "B-15", "B-20"] },
+      { id: "zone-c", name: "Zone C (Terrace Sky Lounge)", tables: ["C-01", "C-02", "C-05", "C-08", "C-10", "C-12", "C-15"] }
+    ],
+    totalTables: 45,
+    activeOutlets: 6,
+    dailyVisitors: 12450
+  },
+  {
     id: "mall-1",
     name: "Phoenix Marketcity Food Hub",
     city: "Mumbai",
@@ -10,13 +24,49 @@ export const initialMalls = [
       { id: "zone-terrace", name: "Sky Garden Terrace", tables: ["C-01", "C-08", "C-12"] },
       { id: "zone-central", name: "Central Plaza Tables", tables: ["D-01", "D-04", "D-09"] }
     ],
-    totalTables: 24,
+    totalTables: 28,
     activeOutlets: 6,
     dailyVisitors: 8420
+  },
+  {
+    id: "mall-dlf",
+    name: "DLF Promenade Food Atrium",
+    city: "New Delhi",
+    location: "Level 2 Food Court, Vasant Kunj",
+    zones: [
+      { id: "zone-east", name: "East Wing Seating", tables: ["E-01", "E-05", "E-10", "E-14"] },
+      { id: "zone-west", name: "West Wing Lounge", tables: ["W-02", "W-06", "W-12"] }
+    ],
+    totalTables: 22,
+    activeOutlets: 6,
+    dailyVisitors: 9800
+  },
+  {
+    id: "mall-ambience",
+    name: "Ambience Mall Food Sphere",
+    city: "Gurugram",
+    location: "Level 3 Dining Arena, NH-8",
+    zones: [
+      { id: "zone-oasis", name: "Food Oasis", tables: ["O-01", "O-05", "O-12", "O-18"] },
+      { id: "zone-sky", name: "Skyline Dining", tables: ["S-01", "S-04", "S-08"] }
+    ],
+    totalTables: 30,
+    activeOutlets: 6,
+    dailyVisitors: 11200
   }
 ];
 
 export const initialTables = [
+  // City Center Mall Tables
+  { id: "table-city-a12", number: "A-12", mallId: "mall-city", zone: "Zone A (North Food Atrium)", floor: "Level 3", status: "Active", qrCode: "MALLBITE-CITY-L3-A12" },
+  { id: "table-city-a01", number: "A-01", mallId: "mall-city", zone: "Zone A (North Food Atrium)", floor: "Level 3", status: "Active", qrCode: "MALLBITE-CITY-L3-A01" },
+  { id: "table-city-a05", number: "A-05", mallId: "mall-city", zone: "Zone A (North Food Atrium)", floor: "Level 3", status: "Active", qrCode: "MALLBITE-CITY-L3-A05" },
+  { id: "table-city-a24", number: "A-24", mallId: "mall-city", zone: "Zone A (North Food Atrium)", floor: "Level 3", status: "Active", qrCode: "MALLBITE-CITY-L3-A24" },
+  { id: "table-city-b05", number: "B-05", mallId: "mall-city", zone: "Zone B (Central Dome Dining)", floor: "Level 3", status: "Active", qrCode: "MALLBITE-CITY-L3-B05" },
+  { id: "table-city-b12", number: "B-12", mallId: "mall-city", zone: "Zone B (Central Dome Dining)", floor: "Level 3", status: "Active", qrCode: "MALLBITE-CITY-L3-B12" },
+  { id: "table-city-c05", number: "C-05", mallId: "mall-city", zone: "Zone C (Terrace Sky Lounge)", floor: "Level 3", status: "Active", qrCode: "MALLBITE-CITY-L3-C05" },
+  
+  // Phoenix Marketcity Tables
   { id: "table-a24", number: "A-24", mallId: "mall-1", zone: "North Food Court", floor: "Level 2", status: "Active", qrCode: "MALLBITE-PHX-L2-A24" },
   { id: "table-a10", number: "A-10", mallId: "mall-1", zone: "North Food Court", floor: "Level 2", status: "Active", qrCode: "MALLBITE-PHX-L2-A10" },
   { id: "table-a01", number: "A-01", mallId: "mall-1", zone: "North Food Court", floor: "Level 2", status: "Active", qrCode: "MALLBITE-PHX-L2-A01" },
@@ -25,6 +75,7 @@ export const initialTables = [
   { id: "table-c12", number: "C-12", mallId: "mall-1", zone: "Sky Garden Terrace", floor: "Level 3", status: "Active", qrCode: "MALLBITE-PHX-L3-C12" },
   { id: "table-d04", number: "D-04", mallId: "mall-1", zone: "Central Plaza Tables", floor: "Level 2", status: "Active", qrCode: "MALLBITE-PHX-L2-D04" }
 ];
+
 
 export const initialCategories = [
   { id: "cat-burgers", name: "Burgers", icon: "🍔", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&auto=format&fit=crop&q=80" },
@@ -532,10 +583,13 @@ export const initialMenuItems = [
 ];
 
 export const initialCoupons = [
+  { code: "CITY50", discountType: "fixed", value: 50, minOrder: 250, description: "Flat ₹50 OFF for City Center Mall food court orders above ₹250!" },
   { code: "MALLBITE50", discountType: "fixed", value: 50, minOrder: 300, description: "Flat ₹50 OFF on orders above ₹300 across all food outlets!" },
   { code: "FOODCOURT20", discountType: "percentage", value: 20, maxDiscount: 100, minOrder: 400, description: "20% OFF up to ₹100 for multi-restaurant orders" },
+  { code: "WELCOME100", discountType: "fixed", value: 100, minOrder: 500, description: "Welcome Offer: Flat ₹100 OFF on your first mall order above ₹500!" },
   { code: "COMBO40", discountType: "fixed", value: 40, minOrder: 250, description: "Special Multi-Outlet Combo discount" }
 ];
+
 
 export const initialHeatmap = [
   { zoneId: "North Court (A-Tables)", intensity: "High", color: "#EF4444", ordersCount: 48, revenue: "₹24,800", activeCustomers: 32, note: "Peak lunch/dinner traffic near Burger House & Pizza Corner" },

@@ -33,20 +33,55 @@ class DataStore {
     return this.malls;
   }
 
-  getTables() {
+  getMallById(id) {
+    return this.malls.find(m => m.id === id || m.id.toLowerCase() === (id || "").toLowerCase());
+  }
+
+  createMall(data) {
+    const id = `mall-${Date.now()}`;
+    const newMall = {
+      id,
+      name: data.name || "New Mall Food Court",
+      city: data.city || "City Center",
+      location: data.location || "Central Food Atrium",
+      zones: data.zones || [
+        { id: "zone-1", name: "North Food Court", tables: ["A-01", "A-02", "A-05", "A-10"] },
+        { id: "zone-2", name: "Central Dining", tables: ["B-01", "B-05", "B-10"] }
+      ],
+      totalTables: data.totalTables || 20,
+      activeOutlets: data.activeOutlets || 6,
+      dailyVisitors: data.dailyVisitors || 5000
+    };
+    this.malls.unshift(newMall);
+    return newMall;
+  }
+
+  getTables(mallId) {
+    if (mallId) {
+      return this.tables.filter(t => t.mallId === mallId);
+    }
     return this.tables;
   }
 
-  getTableByNumber(tableNumber) {
+  getTableByNumber(tableNumber, mallId = "mall-city") {
     const cleanNum = (tableNumber || "").toUpperCase().trim();
-    return this.tables.find(t => t.number.toUpperCase() === cleanNum) || {
+    const table = this.tables.find(t => 
+      t.number.toUpperCase() === cleanNum && (!mallId || t.mallId === mallId || mallId === 'all')
+    );
+    if (table) return table;
+
+    const matchedByNum = this.tables.find(t => t.number.toUpperCase() === cleanNum);
+    if (matchedByNum) return matchedByNum;
+
+    const mall = this.getMallById(mallId) || this.malls[0];
+    return {
       id: `table-custom-${cleanNum}`,
-      number: cleanNum || "A-24",
-      mallId: "mall-1",
-      zone: "North Food Court",
-      floor: "Level 2",
+      number: cleanNum || "A-12",
+      mallId: mall ? mall.id : "mall-city",
+      zone: "Zone A (North Food Atrium)",
+      floor: "Level 3",
       status: "Active",
-      qrCode: `MALLBITE-PHX-L2-${cleanNum || "A24"}`
+      qrCode: `MALLBITE-${(mall ? mall.id : 'CITY').toUpperCase()}-L3-${cleanNum || "A12"}`
     };
   }
 
@@ -55,14 +90,36 @@ class DataStore {
     const newTable = {
       id,
       number: data.number.toUpperCase(),
-      mallId: data.mallId || "mall-1",
-      zone: data.zone || "North Food Court",
-      floor: data.floor || "Level 2",
+      mallId: data.mallId || "mall-city",
+      zone: data.zone || "North Food Atrium",
+      floor: data.floor || "Level 3",
       status: "Active",
-      qrCode: `MALLBITE-PHX-${data.floor ? data.floor.replace(/\s+/g, '') : 'L2'}-${data.number.toUpperCase()}`
+      qrCode: `MALLBITE-${(data.mallId || 'CITY').toUpperCase()}-${data.floor ? data.floor.replace(/\s+/g, '') : 'L3'}-${data.number.toUpperCase()}`
     };
     this.tables.push(newTable);
     return newTable;
+  }
+
+  bulkCreateTables(tableList, mallId = "mall-city", zone = "Zone A", floor = "Level 3") {
+    const created = [];
+    for (const num of tableList) {
+      const cleanNum = num.toUpperCase().trim();
+      const existing = this.tables.find(t => t.number === cleanNum && t.mallId === mallId);
+      if (!existing) {
+        const newTable = {
+          id: `table-${mallId}-${cleanNum.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+          number: cleanNum,
+          mallId,
+          zone,
+          floor,
+          status: "Active",
+          qrCode: `MALLBITE-${mallId.toUpperCase()}-${floor.replace(/\s+/g, '')}-${cleanNum}`
+        };
+        this.tables.push(newTable);
+        created.push(newTable);
+      }
+    }
+    return created;
   }
 
   // --- Categories & Restaurants ---
@@ -78,6 +135,31 @@ class DataStore {
     return this.restaurants.find(r => r.id === id);
   }
 
+  createRestaurant(data) {
+    const id = `rest-${Date.now()}`;
+    const newRestaurant = {
+      id,
+      name: data.name,
+      tagline: data.tagline || "Delicious specialty items prepared fresh",
+      category: data.category || "Fast Food • Multi-Cuisine",
+      rating: 4.8,
+      reviewsCount: 1,
+      prepTime: data.prepTime || "10-15 mins",
+      priceForTwo: data.priceForTwo || "₹350",
+      counterNumber: data.counterNumber || `FC-${this.restaurants.length + 1}`,
+      floor: data.floor || "Level 3 Food Court",
+      isVegOnly: !!data.isVegOnly,
+      offerTag: data.offerTag || "10% OFF ON ORDERS ABOVE ₹199",
+      bannerImage: data.bannerImage || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+      logoImage: data.logoImage || "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&auto=format&fit=crop&q=80",
+      status: "Open",
+      todayOrders: 0,
+      todayRevenue: 0
+    };
+    this.restaurants.push(newRestaurant);
+    return newRestaurant;
+  }
+
   updateRestaurant(id, data) {
     const idx = this.restaurants.findIndex(r => r.id === id);
     if (idx !== -1) {
@@ -86,6 +168,7 @@ class DataStore {
     }
     return null;
   }
+
 
   // --- Menu Items ---
   getMenuItems(filters = {}) {

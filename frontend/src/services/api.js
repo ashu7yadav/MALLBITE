@@ -15,16 +15,38 @@ export const api = {
     const res = await fetch(`${API_BASE}/malls`);
     return res.json();
   },
-  getTables: async () => {
-    const res = await fetch(`${API_BASE}/tables`);
+  getMallById: async (id) => {
+    const res = await fetch(`${API_BASE}/malls/${id}`);
     return res.json();
   },
-  detectTable: async (tableNumber) => {
-    const res = await fetch(`${API_BASE}/tables/detect/${tableNumber}`);
+  createMall: async (data) => {
+    const res = await fetch(`${API_BASE}/malls`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+  getTables: async (mallId) => {
+    const query = mallId ? `?mallId=${mallId}` : '';
+    const res = await fetch(`${API_BASE}/tables${query}`);
+    return res.json();
+  },
+  detectTable: async (tableNumber, mallId) => {
+    const query = mallId ? `?mallId=${mallId}` : '';
+    const res = await fetch(`${API_BASE}/tables/detect/${tableNumber}${query}`);
     return res.json();
   },
   createTable: async (data) => {
     const res = await fetch(`${API_BASE}/tables`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+  bulkCreateTables: async (data) => {
+    const res = await fetch(`${API_BASE}/tables/bulk`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -41,6 +63,14 @@ export const api = {
     const res = await fetch(`${API_BASE}/restaurants`);
     return res.json();
   },
+  createRestaurant: async (data) => {
+    const res = await fetch(`${API_BASE}/restaurants`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
   getRestaurantById: async (id) => {
     const res = await fetch(`${API_BASE}/restaurants/${id}`);
     return res.json();
@@ -53,6 +83,7 @@ export const api = {
     });
     return res.json();
   },
+
 
   // Menu
   getMenu: async (params = {}) => {

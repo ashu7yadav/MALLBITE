@@ -117,29 +117,105 @@ export const Header = ({ onOpenSearch, onOpenHistory }) => {
                 </div>
               </button>
 
-              {/* Table Identification Dropdown Badge */}
-              <button
-                onClick={() => setIsQrScannerOpen(true)}
-                className="relative flex items-center gap-2.5 bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/90 hover:border-brand-300 rounded-2xl px-3 sm:px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-all group text-left shadow-sm hover:shadow"
-                title="Click to scan or switch table"
-              >
-                <div className="relative w-7 h-7 rounded-xl bg-gradient-to-tr from-brand-500 to-amber-400 text-white flex items-center justify-center shrink-0 shadow-sm">
-                  <MapPin className="w-4 h-4 text-white" />
-                  <span className="radar-ping-ring"></span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[9px] text-slate-400 uppercase font-black tracking-wider leading-none flex items-center gap-1">
-                    Your Table <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  </span>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <span className="font-extrabold font-display text-slate-900 text-xs sm:text-[13px] tracking-tight">
-                      Table {currentTable.number} • {currentTable.zone}
-                    </span>
-                    <ChevronDown className="w-3 h-3 text-slate-400 group-hover:text-brand-500 transition-transform group-hover:translate-y-0.5" />
+              {/* Mall & Table Identification Dropdown Badge */}
+              <div className="relative group/mall">
+                <button
+                  className="relative flex items-center gap-2.5 bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/90 hover:border-brand-300 rounded-2xl px-3 sm:px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-all text-left shadow-sm hover:shadow cursor-pointer"
+                  title="Click to switch Mall or Table"
+                >
+                  <div className="relative w-7 h-7 rounded-xl bg-gradient-to-tr from-brand-500 to-amber-400 text-white flex items-center justify-center shrink-0 shadow-sm">
+                    <MapPin className="w-4 h-4 text-white" />
+                    <span className="radar-ping-ring"></span>
                   </div>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] text-brand-600 uppercase font-black tracking-wider leading-none flex items-center gap-1">
+                      {currentMall.name.split(' ')[0]} {currentMall.name.split(' ')[1]} <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    </span>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <span className="font-extrabold font-display text-slate-900 text-xs sm:text-[13px] tracking-tight">
+                        Table {currentTable.number} • {currentTable.zone ? currentTable.zone.split('(')[0] : 'Food Court'}
+                      </span>
+                      <ChevronDown className="w-3 h-3 text-slate-400 group-hover/mall:text-brand-500 transition-transform group-hover/mall:translate-y-0.5" />
+                    </div>
+                  </div>
+                </button>
+
+                {/* Dropdown Menu for Switching Mall and Table */}
+                <div className="absolute left-0 mt-2 w-80 bg-white/95 backdrop-blur-xl rounded-3xl shadow-elevated border border-slate-100 p-3 hidden group-hover/mall:block transition-all z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="px-2 py-1 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                    <span>Select Active Shopping Mall</span>
+                    <span className="text-brand-600 font-extrabold">Food Court OS</span>
+                  </div>
+
+                  <div className="space-y-1.5 mt-2">
+                    {/* Mall 1: City Center Mall */}
+                    <button
+                      onClick={() => switchMall('mall-city')}
+                      className={`w-full flex items-center gap-2.5 p-2 rounded-2xl text-xs text-left transition-all ${currentMall.id === 'mall-city' ? 'bg-brand-50 text-brand-700 font-extrabold border border-brand-200/60 shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`}
+                    >
+                      <Building2 className={`w-4 h-4 shrink-0 ${currentMall.id === 'mall-city' ? 'text-brand-600' : 'text-slate-400'}`} />
+                      <div className="flex-1 min-w-0">
+                        <div className="truncate font-display">City Center Mall Food Court</div>
+                        <div className="text-[10px] text-slate-400 font-normal">Level 3 Grand Atrium • 45 Tables</div>
+                      </div>
+                      {currentMall.id === 'mall-city' && <span className="w-2 h-2 rounded-full bg-brand-500 shrink-0"></span>}
+                    </button>
+
+                    {/* Mall 2: Phoenix Marketcity */}
+                    <button
+                      onClick={() => switchMall('mall-1')}
+                      className={`w-full flex items-center gap-2.5 p-2 rounded-2xl text-xs text-left transition-all ${currentMall.id === 'mall-1' ? 'bg-brand-50 text-brand-700 font-extrabold border border-brand-200/60 shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`}
+                    >
+                      <Building2 className={`w-4 h-4 shrink-0 ${currentMall.id === 'mall-1' ? 'text-brand-600' : 'text-slate-400'}`} />
+                      <div className="flex-1 min-w-0">
+                        <div className="truncate font-display">Phoenix Marketcity Food Hub</div>
+                        <div className="text-[10px] text-slate-400 font-normal">Level 2 & 3 • Mumbai • 28 Tables</div>
+                      </div>
+                      {currentMall.id === 'mall-1' && <span className="w-2 h-2 rounded-full bg-brand-500 shrink-0"></span>}
+                    </button>
+
+                    {/* Mall 3: DLF Promenade */}
+                    <button
+                      onClick={() => switchMall('mall-dlf')}
+                      className={`w-full flex items-center gap-2.5 p-2 rounded-2xl text-xs text-left transition-all ${currentMall.id === 'mall-dlf' ? 'bg-brand-50 text-brand-700 font-extrabold border border-brand-200/60 shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`}
+                    >
+                      <Building2 className={`w-4 h-4 shrink-0 ${currentMall.id === 'mall-dlf' ? 'text-brand-600' : 'text-slate-400'}`} />
+                      <div className="flex-1 min-w-0">
+                        <div className="truncate font-display">DLF Promenade Food Atrium</div>
+                        <div className="text-[10px] text-slate-400 font-normal">Level 2 • New Delhi • 22 Tables</div>
+                      </div>
+                      {currentMall.id === 'mall-dlf' && <span className="w-2 h-2 rounded-full bg-brand-500 shrink-0"></span>}
+                    </button>
+                  </div>
+
+                  <div className="my-2 border-t border-slate-100"></div>
+
+                  <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                    Quick Table Selection
+                  </div>
+                  <div className="grid grid-cols-4 gap-1.5 mt-1.5">
+                    {['A-01', 'A-05', 'A-12', 'A-24', 'B-05', 'B-12', 'C-05', 'C-12'].map((num) => (
+                      <button
+                        key={num}
+                        onClick={() => switchTable(num)}
+                        className={`py-1 text-xs rounded-xl font-bold transition-all text-center ${currentTable.number === num ? 'bg-brand-500 text-white shadow-sm font-black' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => setIsQrScannerOpen(true)}
+                    className="w-full mt-2.5 flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white py-2 rounded-2xl text-xs font-black shadow-sm transition-all"
+                  >
+                    <QrCode className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Scan Physical Table QR</span>
+                  </button>
                 </div>
-              </button>
+              </div>
             </div>
+
 
             {/* AI Search Bar (Desktop) */}
             <div className="hidden md:flex flex-1 max-w-lg mx-2">

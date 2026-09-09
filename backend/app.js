@@ -36,12 +36,31 @@ app.get("/api/malls", (req, res) => {
   res.json({ success: true, data: dataStore.getMalls() });
 });
 
+app.get("/api/malls/:id", (req, res) => {
+  const mall = dataStore.getMallById(req.params.id);
+  if (!mall) {
+    return res.status(404).json({ success: false, message: "Mall not found." });
+  }
+  res.json({ success: true, data: mall });
+});
+
+app.post("/api/malls", (req, res) => {
+  const { name, city, location, zones, totalTables } = req.body;
+  if (!name) {
+    return res.status(400).json({ success: false, message: "Mall name is required." });
+  }
+  const newMall = dataStore.createMall({ name, city, location, zones, totalTables });
+  res.status(201).json({ success: true, data: newMall, message: `${name} successfully onboarded to MALLBITE!` });
+});
+
 app.get("/api/tables", (req, res) => {
-  res.json({ success: true, data: dataStore.getTables() });
+  const { mallId } = req.query;
+  res.json({ success: true, data: dataStore.getTables(mallId) });
 });
 
 app.get("/api/tables/detect/:number", (req, res) => {
-  const table = dataStore.getTableByNumber(req.params.number);
+  const { mallId } = req.query;
+  const table = dataStore.getTableByNumber(req.params.number, mallId);
   res.json({ success: true, data: table });
 });
 
@@ -54,6 +73,15 @@ app.post("/api/tables", (req, res) => {
   res.status(201).json({ success: true, data: newTable });
 });
 
+app.post("/api/tables/bulk", (req, res) => {
+  const { tables, mallId, zone, floor } = req.body;
+  if (!tables || !Array.isArray(tables) || tables.length === 0) {
+    return res.status(400).json({ success: false, message: "List of table numbers is required." });
+  }
+  const created = dataStore.bulkCreateTables(tables, mallId, zone, floor);
+  res.status(201).json({ success: true, count: created.length, data: created });
+});
+
 // --- Categories & Restaurants ---
 app.get("/api/categories", (req, res) => {
   res.json({ success: true, data: dataStore.getCategories() });
@@ -61,6 +89,15 @@ app.get("/api/categories", (req, res) => {
 
 app.get("/api/restaurants", (req, res) => {
   res.json({ success: true, data: dataStore.getRestaurants() });
+});
+
+app.post("/api/restaurants", (req, res) => {
+  const { name, tagline, category, priceForTwo, counterNumber, floor, isVegOnly, bannerImage, logoImage } = req.body;
+  if (!name) {
+    return res.status(400).json({ success: false, message: "Restaurant name is required." });
+  }
+  const newRest = dataStore.createRestaurant({ name, tagline, category, priceForTwo, counterNumber, floor, isVegOnly, bannerImage, logoImage });
+  res.status(201).json({ success: true, data: newRest, message: `${name} outlet added to food court!` });
 });
 
 app.get("/api/restaurants/:id", (req, res) => {
@@ -71,6 +108,7 @@ app.get("/api/restaurants/:id", (req, res) => {
   const menu = dataStore.getMenuItems({ restaurantId: req.params.id });
   res.json({ success: true, data: { ...rest, menu } });
 });
+
 
 app.patch("/api/restaurants/:id", (req, res) => {
   const updated = dataStore.updateRestaurant(req.params.id, req.body);

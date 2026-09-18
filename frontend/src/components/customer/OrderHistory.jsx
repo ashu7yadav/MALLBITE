@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Store, MapPin, ChevronRight, CheckCircle2, RotateCcw, Star } from 'lucide-react';
+import { Clock, Store, MapPin, ChevronRight, CheckCircle2, RotateCcw, Star, ArrowLeft } from 'lucide-react';
 import { api } from '../../services/api';
 import { useMall } from '../../context/MallContext';
 
-export const OrderHistory = ({ onSelectOrder }) => {
+export const OrderHistory = ({ onSelectOrder, onBack }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,10 +25,22 @@ export const OrderHistory = ({ onSelectOrder }) => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-4 pb-20 animate-in fade-in duration-200">
+      
+      {/* Top Back Navigation Option */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-2 text-xs font-black text-[#2A2521] hover:text-[#F95721] mb-2 bg-white px-4 py-2 rounded-2xl border border-[#EFE8DE] shadow-xs transition-all hover:scale-105 active:scale-95"
+        >
+          <ArrowLeft className="w-4 h-4 text-[#F95721]" />
+          <span>Back to Food Court Home</span>
+        </button>
+      )}
+
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900">Your Food Court Orders</h2>
-          <p className="text-xs text-slate-500 font-medium">History of unified multi-outlet orders</p>
+          <h2 className="text-xl sm:text-2xl font-black text-[#2A2521] font-display">Your Food Court Orders</h2>
+          <p className="text-xs text-[#8E857C] font-medium">History of unified multi-outlet orders</p>
         </div>
       </div>
 

@@ -16,7 +16,8 @@ import {
   Radio,
   Clock,
   CheckCircle2,
-  SlidersHorizontal
+  SlidersHorizontal,
+  ArrowLeft
 } from 'lucide-react';
 import { useMall } from '../../context/MallContext';
 import { useCart } from '../../context/CartContext';
@@ -30,7 +31,7 @@ const SEARCH_PLACEHOLDERS = [
   'Try AI: "Pure veg quick bite in 10 mins..."'
 ];
 
-export const Header = ({ onOpenSearch, onOpenHistory, onOpenStandee, onOpenMobile }) => {
+export const Header = ({ onOpenSearch, onOpenHistory, onOpenStandee, onOpenMobile, onBackToHome, showBack }) => {
   const { currentMall, currentTable, setIsQrScannerOpen, setIsDemoModalOpen } = useMall();
   const { totalItemsCount, cartSubtotal, setIsCartDrawerOpen } = useCart();
   const { currentRole, setCurrentRole } = useAuth();
@@ -116,6 +117,19 @@ export const Header = ({ onOpenSearch, onOpenHistory, onOpenStandee, onOpenMobil
                   </span>
                 </div>
               </button>
+
+              {/* Back to Home Button when viewing sub-pages/dashboards */}
+              {showBack && (
+                <button
+                  onClick={onBackToHome}
+                  className="flex items-center gap-1.5 bg-[#FFF2EB] hover:bg-[#FFEADA] text-[#F95721] px-3.5 py-1.5 rounded-2xl text-xs font-black border border-[#F6DEC9] transition-all hover:scale-105 active:scale-95 shadow-xs shrink-0"
+                  title="Back to Food Court Home"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Back to Home</span>
+                  <span className="sm:hidden">Back</span>
+                </button>
+              )}
 
               {/* Mall & Table Identification Dropdown Badge */}
               <div className="relative group/mall">

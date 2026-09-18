@@ -12,7 +12,8 @@ import {
   Phone, 
   ShieldCheck, 
   RefreshCw,
-  Award
+  Award,
+  ArrowLeft
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useMall } from '../../context/MallContext';
@@ -68,6 +69,17 @@ export const LiveOrderTracker = ({ onBackToHome }) => {
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-20 animate-in fade-in duration-200">
       
+      {/* Top Back Navigation Option */}
+      {onBackToHome && (
+        <button
+          onClick={onBackToHome}
+          className="inline-flex items-center gap-2 text-xs font-black text-[#2A2521] hover:text-[#F95721] bg-white px-4 py-2 rounded-2xl border border-[#EFE8DE] shadow-xs transition-all hover:scale-105 active:scale-95"
+        >
+          <ArrowLeft className="w-4 h-4 text-[#F95721]" />
+          <span>Back to Food Court Home</span>
+        </button>
+      )}
+
       {/* Top Banner with Master Order ID & Table Notice */}
       <div className="bg-slate-900 rounded-3xl p-6 text-white relative overflow-hidden shadow-elevated">
         <div className="absolute right-0 top-0 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl" />

@@ -67,9 +67,9 @@ export const RestaurantDetail = ({ restaurant, onBack }) => {
       {/* Top Back Navigation */}
       <button
         onClick={onBack}
-        className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-brand-600 mb-4 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition-colors"
+        className="inline-flex items-center gap-2 text-xs font-black text-[#2A2521] hover:text-[#F95721] mb-4 bg-white px-4 py-2 rounded-2xl border border-[#EFE8DE] shadow-xs transition-all hover:scale-105 active:scale-95"
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-4 h-4 text-[#F95721]" />
         <span>Back to Food Court Outlets</span>
       </button>
 

@@ -36,7 +36,7 @@ import { MallDashboard } from './components/mall_admin/MallDashboard';
 import { DeliveryDashboard } from './components/delivery/DeliveryDashboard';
 import { LandingPage } from './components/landing/LandingPage';
 
-import { Sparkles, Star, Flame, Filter, Zap, ArrowRight, CheckCircle2, QrCode, Smartphone } from 'lucide-react';
+import { Sparkles, Star, Flame, Filter, Zap, ArrowRight, CheckCircle2, QrCode, Smartphone, ArrowLeft } from 'lucide-react';
 
 const CustomerHub = ({ 
   onOpenSearch, 
@@ -86,6 +86,7 @@ const CustomerHub = ({
     return (
       <OrderHistory
         onSelectOrder={() => setCustomerView('tracker')}
+        onBack={() => setCustomerView('home')}
       />
     );
   }
@@ -268,12 +269,40 @@ const MainAppContent = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         
+        {/* Top Notification Bar when in other Role Dashboards with Instant Back Option */}
+        {currentRole !== ROLES.CUSTOMER && (
+          <div className="bg-[#FFF4EC] border-b border-[#F6DEC9] py-2.5 px-4 sm:px-6 flex items-center justify-between text-xs font-bold text-[#6F665D] z-30">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#F95721] animate-pulse" />
+              <span>
+                Viewing <strong>{currentRole === ROLES.MALL_ADMIN ? 'Mall Admin Dashboard' : currentRole === ROLES.RESTAURANT ? 'Kitchen Dashboard' : currentRole === ROLES.DELIVERY ? 'Delivery Runner Hub' : 'Pitch Landing Page'}</strong>
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                setCurrentRole(ROLES.CUSTOMER);
+                setCustomerView('home');
+              }}
+              className="flex items-center gap-1.5 bg-[#F95721] hover:bg-[#EA580C] text-white px-3.5 py-1.5 rounded-xl text-xs font-black shadow-xs active:scale-95 transition-all"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Customer Menu</span>
+            </button>
+          </div>
+        )}
+
         {/* Top Universal Header with Search, User Profile, Standee and Mobile Triggers */}
         <Header
           onOpenSearch={() => setIsSearchOpen(true)}
           onOpenHistory={() => setCustomerView('history')}
           onOpenStandee={() => setIsStandeeModalOpen(true)}
           onOpenMobile={() => setIsMobileSimulatorOpen(true)}
+          onBackToHome={() => {
+            setCustomerView('home');
+            setCurrentRole(ROLES.CUSTOMER);
+            setSelectedRestaurant(null);
+          }}
+          showBack={customerView !== 'home' || currentRole !== ROLES.CUSTOMER}
         />
 
         {/* Dynamic Role / Main Hub View */}

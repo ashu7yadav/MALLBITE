@@ -15,9 +15,12 @@ import {
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useMall } from '../../context/MallContext';
+import { EcoScoreBadge } from '../common/EcoScoreBadge';
+import { ecoScoreService } from '../../services/ecoScoreService';
 
 export const MultiCartDrawer = () => {
   const { currentTable } = useMall();
+  const [isReusable, setIsReusable] = useState(false);
   const {
     cartItems,
     itemsByRestaurant,
@@ -222,6 +225,33 @@ export const MultiCartDrawer = () => {
                     </form>
                   )}
                 </div>
+
+                {/* Environmental Intelligence Layer (Feature 3: Eco Score) */}
+                {(() => {
+                  const eco = ecoScoreService.calculate(cartItems, distinctRestaurantsCount, isReusable);
+                  return (
+                    <div className="space-y-2">
+                      <EcoScoreBadge
+                        ecoScore={eco.score}
+                        packagingSaved={eco.packagingSaved}
+                        tripsAvoided={eco.deliveryTripsAvoided}
+                        explanation={eco.explanation}
+                      />
+
+                      <label className="flex items-center gap-2 p-2.5 bg-[#FAF7F2] border border-[#EFE8DE] rounded-xl text-xs text-[#2A2521] cursor-pointer hover:bg-[#F5EFE6] transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={isReusable}
+                          onChange={(e) => setIsReusable(e.target.checked)}
+                          className="w-4 h-4 text-[#F95721] rounded border-slate-300 focus:ring-[#F95721]"
+                        />
+                        <span className="font-semibold text-[11px]">
+                          🌱 Opt for Reusable Food Court Trays (+6 Eco Points)
+                        </span>
+                      </label>
+                    </div>
+                  );
+                })()}
 
                 {/* Bill Breakdown */}
                 <div className="space-y-2 pt-2 border-t border-slate-100 text-xs">

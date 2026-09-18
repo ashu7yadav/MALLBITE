@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Store, MapPin, ChevronRight, CheckCircle2, RotateCcw, Star, ArrowLeft } from 'lucide-react';
+import { MapPin, Store, ChevronRight, ArrowLeft } from 'lucide-react';
 import { api } from '../../services/api';
+import { EcoScoreBadge } from '../common/EcoScoreBadge';
 import { useMall } from '../../context/MallContext';
 
 export const OrderHistory = ({ onSelectOrder, onBack }) => {
@@ -66,6 +67,7 @@ export const OrderHistory = ({ onSelectOrder, onBack }) => {
                   <MapPin className="w-3 h-3 text-slate-400" />
                   Table {ord.tableNumber}
                 </span>
+                <EcoScoreBadge compact ecoScore={ord.ecoScore?.score || 82} />
               </div>
               <span className={`text-xs font-extrabold px-2.5 py-0.5 rounded-full ${ord.orderStatus === 'Delivered' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
                 {ord.orderStatus}

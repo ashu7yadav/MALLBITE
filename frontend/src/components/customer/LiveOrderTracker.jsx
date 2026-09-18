@@ -19,6 +19,10 @@ import confetti from 'canvas-confetti';
 import { useMall } from '../../context/MallContext';
 import { useCart } from '../../context/CartContext';
 import { api } from '../../services/api';
+import { QueueTimeline } from './QueueTimeline';
+import { EcoScoreBadge } from '../common/EcoScoreBadge';
+import { queueOptimizer } from '../../services/queueOptimizer';
+import { ecoScoreService } from '../../services/ecoScoreService';
 
 export const LiveOrderTracker = ({ onBackToHome }) => {
   const { activeMasterOrder, currentTable, refreshData, addNotification } = useMall();
@@ -195,6 +199,32 @@ export const LiveOrderTracker = ({ onBackToHome }) => {
           </div>
         </div>
       </div>
+
+      {/* FEATURE 2: SMART QUEUE SYNCHRONIZATION TIMELINE */}
+      {(() => {
+        const queueData = order.queueOptimization || queueOptimizer.synchronizeSchedule(order.subOrders, []);
+        return (
+          <QueueTimeline
+            schedule={queueData.schedule}
+            targetDeliveryMinutes={queueData.targetDeliveryMinutes}
+            tableNumber={order.tableNumber || currentTable.number || "A17"}
+            timelineSummary={queueData.timelineSummary}
+          />
+        );
+      })()}
+
+      {/* FEATURE 3: ECO SCORE DETAILS */}
+      {(() => {
+        const eco = order.ecoScore || ecoScoreService.calculate(order.items || [], order.subOrders?.length || 2);
+        return (
+          <EcoScoreBadge
+            ecoScore={eco.score}
+            packagingSaved={eco.packagingSaved}
+            tripsAvoided={eco.deliveryTripsAvoided}
+            explanation={eco.explanation}
+          />
+        );
+      })()}
 
       {/* Breakdown of Individual Outlet Sub-Orders (Feature 6 & 7) */}
       <div className="text-left">

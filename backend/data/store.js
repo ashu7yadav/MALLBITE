@@ -406,6 +406,8 @@ class DataStore {
 
     // Calculate smart batch parameters for this multi-outlet order
     const smartBatch = AIEngine.calculateSmartBatch(subOrders, this.restaurants);
+    const queueOptimization = AIEngine.optimizeQueueSchedule(subOrders, this.restaurants);
+    const ecoScore = AIEngine.calculateEcoScore(items, subOrders.length, Boolean(isReusablePackaging));
 
     const assignedRunner = this.deliveryStaff[0];
     const mallObj = this.getMallById(mallId);
@@ -424,14 +426,16 @@ class DataStore {
       totalAmount,
       paymentStatus: "Paid (UPI Verified)",
       paymentMethod,
-      orderStatus: "Preparing",
+      orderStatus: "SPLIT_TO_OUTLETS", // CREATED -> PAYMENT_CONFIRMED -> SPLIT_TO_OUTLETS -> PREPARING -> WAITING_FOR_CONSOLIDATION -> READY_FOR_DELIVERY -> OUT_FOR_DELIVERY -> DELIVERED
       createdAt: new Date().toISOString(),
-      estimatedDeliveryTime: `${smartBatch ? smartBatch.estimatedDeliveryMinutes : 12} mins`,
+      estimatedDeliveryTime: `${queueOptimization ? queueOptimization.targetDeliveryMinutes : 15} mins`,
       deliveryStaff: `${assignedRunner.name} (Runner #1)`,
       deliveryStaffPhone: assignedRunner.phone,
       deliveryStatus: "Assigned",
       subOrders,
-      smartBatch
+      smartBatch,
+      queueOptimization,
+      ecoScore
     };
 
     this.orders.unshift(masterOrder);
@@ -458,6 +462,54 @@ class DataStore {
     this.deliveryTasks.unshift(deliveryTask);
 
     return masterOrder;
+  }
+
+  getGroupPlan(members, totalBudget) {
+    return AIEngine.generateGroupPlan(members, totalBudget, this.menuItems, this.restaurants);
+  }
+
+  getQueueSchedule(orderId) {
+    const order = this.getMasterOrderById(orderId);
+    if (!order) return null;
+    return order.queueOptimization || AIEngine.optimizeQueueSchedule(order.subOrders, this.restaurants);
+  }
+
+  getEcoScore(orderId) {
+    const order = this.getMasterOrderById(orderId);
+    if (!order) return null;
+    return order.ecoScore || AIEngine.calculateEcoScore(order.items || [], order.subOrders?.length || 1);
+  }
+
+  getVendorDemandForecast(outletId) {
+    return AIEngine.getVendorDemandForecast(outletId, this.restaurants, this.menuItems);
+  }
+
+  getVendorAnalytics(outletId) {
+    const outlet = this.getRestaurantById(outletId) || this.restaurants[0];
+    const forecast = AIEngine.getVendorDemandForecast(outlet?.id, this.restaurants, this.menuItems);
+    const outletOrders = [];
+    this.orders.forEach(mo => {
+      const matchSub = mo.subOrders?.find(so => so.restaurantId === outlet?.id);
+      if (matchSub) {
+        outletOrders.push({
+          masterOrderId: mo.id,
+          subOrderId: matchSub.id,
+          tableNumber: mo.tableNumber,
+          items: matchSub.items,
+          status: matchSub.status,
+          createdAt: mo.createdAt
+        });
+      }
+    });
+
+    return {
+      outlet,
+      forecast,
+      activeOrdersCount: outletOrders.length,
+      orders: outletOrders.slice(0, 10),
+      todayOrders: outlet?.todayOrders || 142,
+      todayRevenue: outlet?.todayRevenue || 47600
+    };
   }
 
   getMasterOrders() {

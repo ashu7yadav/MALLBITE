@@ -19,7 +19,8 @@ import {
   SlidersHorizontal,
   ArrowLeft,
   Workflow,
-  Smartphone
+  Smartphone,
+  Users
 } from 'lucide-react';
 import { useMall } from '../../context/MallContext';
 import { useCart } from '../../context/CartContext';
@@ -33,7 +34,7 @@ const SEARCH_PLACEHOLDERS = [
   'Try AI: "Pure veg quick bite in 10 mins..."'
 ];
 
-export const Header = ({ onOpenSearch, onOpenHistory, onOpenStandee, onOpenMobile, onOpenArchitecture, onBackToHome, showBack }) => {
+export const Header = ({ onOpenSearch, onOpenHistory, onOpenStandee, onOpenMobile, onOpenArchitecture, onOpenGroupPlanner, onBackToHome, showBack }) => {
   const { currentMall, currentTable, setIsQrScannerOpen, setIsDemoModalOpen } = useMall();
   const { totalItemsCount, cartSubtotal, setIsCartDrawerOpen } = useCart();
   const { currentRole, setCurrentRole } = useAuth();
@@ -287,6 +288,15 @@ export const Header = ({ onOpenSearch, onOpenHistory, onOpenStandee, onOpenMobil
                     Judge Evaluation Tools
                   </div>
                   <div className="space-y-1 mt-1">
+                    {onOpenGroupPlanner && (
+                      <button
+                        onClick={onOpenGroupPlanner}
+                        className="w-full flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-[#FFF4EC] hover:text-[#F95721] text-left transition-all"
+                      >
+                        <Users className="w-4 h-4 text-[#F95721]" />
+                        <span>AI Group Food Planner</span>
+                      </button>
+                    )}
                     {onOpenStandee && (
                       <button
                         onClick={onOpenStandee}

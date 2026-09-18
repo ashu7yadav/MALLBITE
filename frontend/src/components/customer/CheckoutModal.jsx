@@ -21,6 +21,8 @@ import { useCart } from '../../context/CartContext';
 import { useMall } from '../../context/MallContext';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
+import { EcoScoreBadge } from '../common/EcoScoreBadge';
+import { ecoScoreService } from '../../services/ecoScoreService';
 
 export const CheckoutModal = ({ onOrderSuccess }) => {
   const { currentMall, currentTable, setActiveMasterOrder, addNotification } = useMall();
@@ -152,6 +154,31 @@ export const CheckoutModal = ({ onOrderSuccess }) => {
               ))}
             </div>
           </div>
+
+          {/* Eco Score & Order Synchronization Preview */}
+          {(() => {
+            const eco = ecoScoreService.calculate(cartItems, distinctRestaurantsCount);
+            return (
+              <div className="space-y-2">
+                <EcoScoreBadge
+                  ecoScore={eco.score}
+                  packagingSaved={eco.packagingSaved}
+                  tripsAvoided={eco.deliveryTripsAvoided}
+                  explanation={eco.explanation}
+                />
+
+                <div className="p-2.5 bg-brand-50/80 border border-brand-200/80 rounded-xl flex items-center justify-between text-xs text-brand-900">
+                  <div className="flex items-center gap-1.5 font-black font-display">
+                    <Sparkles className="w-3.5 h-3.5 text-[#F95721]" />
+                    <span>Smart Queue Synchronization:</span>
+                  </div>
+                  <span className="font-extrabold text-[#F95721]">
+                    ~12-15m Combined Arrival
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Payment Method Selector */}
           <div>

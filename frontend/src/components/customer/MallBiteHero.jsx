@@ -9,11 +9,12 @@ import {
   CheckCircle2,
   QrCode,
   MapPin,
-  Scale
+  Scale,
+  Users
 } from 'lucide-react';
 import { useMall } from '../../context/MallContext';
 
-export const MallBiteHero = ({ onExploreClick, onOpenAiModal, onOpenCompareModal, onOpenStandee }) => {
+export const MallBiteHero = ({ onExploreClick, onOpenAiModal, onOpenGroupPlanner, onOpenCompareModal, onOpenStandee }) => {
   const { currentMall, currentTable, setIsQrScannerOpen } = useMall();
 
   return (
@@ -62,11 +63,22 @@ export const MallBiteHero = ({ onExploreClick, onOpenAiModal, onOpenCompareModal
             {/* AI Recommendation Trigger */}
             <button
               onClick={onOpenAiModal}
-              className="flex items-center gap-2.5 bg-[#F95721] hover:bg-[#EA580C] text-white font-black px-6 py-3.5 rounded-2xl text-sm shadow-lg shadow-[#F95721]/30 transition-all hover:scale-105 active:scale-95 font-display"
+              className="flex items-center gap-2.5 bg-[#F95721] hover:bg-[#EA580C] text-white font-black px-5 py-3.5 rounded-2xl text-sm shadow-lg shadow-[#F95721]/30 transition-all hover:scale-105 active:scale-95 font-display"
             >
               <Sparkles className="w-4 h-4 animate-pulse" />
               <span>What Should I Eat?</span>
             </button>
+
+            {/* AI Group Food Planner Trigger */}
+            {onOpenGroupPlanner && (
+              <button
+                onClick={onOpenGroupPlanner}
+                className="flex items-center gap-2 bg-[#2A2521] hover:bg-black text-[#F7F0E5] font-black px-5 py-3.5 rounded-2xl text-sm shadow-md transition-all hover:scale-105 active:scale-95 font-display"
+              >
+                <Users className="w-4 h-4 text-[#F95721]" />
+                <span>AI Group Planner</span>
+              </button>
+            )}
 
             {/* Scan Table QR Button */}
             <button

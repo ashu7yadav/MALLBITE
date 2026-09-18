@@ -173,6 +173,37 @@ app.post("/api/orders", (req, res) => {
   });
 });
 
+// Dedicated Master Order Creation route
+app.post("/api/checkout/create-master-order", (req, res) => {
+  const { tableNumber, customerName, customerPhone, items, paymentMethod, couponCode, isReusablePackaging } = req.body;
+  if (!items || items.length === 0) {
+    return res.status(400).json({ success: false, message: "Cart is empty." });
+  }
+
+  const masterOrder = dataStore.createMasterOrder({
+    tableNumber: tableNumber || "A17",
+    customerName: customerName || "Food Court Guest",
+    customerPhone: customerPhone || "+91 98765 43210",
+    items,
+    paymentMethod: paymentMethod || "UPI",
+    couponCode,
+    isReusablePackaging
+  });
+
+  res.status(201).json({
+    success: true,
+    message: `Master Order #${masterOrder.id} successfully created and synchronized across ${masterOrder.subOrders.length} outlets.`,
+    data: masterOrder
+  });
+});
+
+// Group Planner endpoint
+app.post("/api/group-planner/recommend", (req, res) => {
+  const { members, totalBudget } = req.body;
+  const result = dataStore.getGroupPlan(members, totalBudget);
+  res.json(result);
+});
+
 app.get("/api/orders", (req, res) => {
   res.json({ success: true, data: dataStore.getMasterOrders() });
 });
@@ -183,6 +214,35 @@ app.get("/api/orders/:id", (req, res) => {
     return res.status(404).json({ success: false, message: "Order not found." });
   }
   res.json({ success: true, data: order });
+});
+
+app.get("/api/orders/:id/queue-schedule", (req, res) => {
+  const schedule = dataStore.getQueueSchedule(req.params.id);
+  if (!schedule) {
+    return res.status(404).json({ success: false, message: "Order queue schedule not found." });
+  }
+  res.json({ success: true, data: schedule });
+});
+
+app.get("/api/orders/:id/eco-score", (req, res) => {
+  const score = dataStore.getEcoScore(req.params.id);
+  if (!score) {
+    return res.status(404).json({ success: false, message: "Order eco-score not found." });
+  }
+  res.json({ success: true, data: score });
+});
+
+// Vendor AI Demand Forecast & Analytics
+app.get("/api/vendor/demand-forecast", (req, res) => {
+  const { outletId } = req.query;
+  const forecast = dataStore.getVendorDemandForecast(outletId);
+  res.json({ success: true, data: forecast });
+});
+
+app.get("/api/vendor/analytics", (req, res) => {
+  const { outletId } = req.query;
+  const analytics = dataStore.getVendorAnalytics(outletId);
+  res.json({ success: true, data: analytics });
 });
 
 // Update sub-order status from Kitchen (e.g. Accepted -> Preparing -> Ready)

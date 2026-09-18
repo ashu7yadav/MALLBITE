@@ -16,7 +16,8 @@ import {
   Store,
   Layers,
   Scale,
-  Workflow
+  Workflow,
+  Users
 } from 'lucide-react';
 import { useMall } from '../../context/MallContext';
 import { useAuth, ROLES } from '../../context/AuthContext';
@@ -27,6 +28,7 @@ export const MallBiteSidebar = ({
   onOpenStandee, 
   onExploreClick,
   onOpenAiModal,
+  onOpenGroupPlanner,
   onOpenCompareModal,
   onOpenArchitecture
 }) => {
@@ -35,6 +37,7 @@ export const MallBiteSidebar = ({
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Home },
+    { id: 'group-planner', label: 'Group Planner', icon: Users, badge: 'AI' },
     { id: 'ai-advisor', label: 'AI Food Advisor', icon: Sparkles, badge: 'AI' },
     { id: 'compare', label: 'Compare Food', icon: Scale, badge: 'NEW' },
     { id: 'outlets', label: 'All Outlets', icon: Store },
@@ -88,6 +91,8 @@ export const MallBiteSidebar = ({
                 onClick={() => {
                   if (item.id === 'tableservice') {
                     handleTableServiceRequest();
+                  } else if (item.id === 'group-planner' && onOpenGroupPlanner) {
+                    onOpenGroupPlanner();
                   } else if (item.id === 'ai-advisor' && onOpenAiModal) {
                     onOpenAiModal();
                   } else if (item.id === 'compare' && onOpenCompareModal) {

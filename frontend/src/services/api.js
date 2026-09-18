@@ -230,5 +230,49 @@ export const api = {
       body: JSON.stringify({ action })
     });
     return res.json();
+  },
+
+  // FEATURE 1: AI Group Food Planner
+  getGroupPlanRecommendations: async (members, totalBudget) => {
+    const res = await fetch(`${API_BASE}/group-planner/recommend`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ members, totalBudget })
+    });
+    return res.json();
+  },
+
+  // FEATURE 5: Smart Multi-Outlet Master Order Checkout
+  createMasterOrder: async (orderData) => {
+    const res = await fetch(`${API_BASE}/checkout/create-master-order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData)
+    });
+    return res.json();
+  },
+
+  // FEATURE 2: Queue Optimization Schedule
+  getOrderQueueSchedule: async (orderId) => {
+    const res = await fetch(`${API_BASE}/orders/${orderId}/queue-schedule`);
+    return res.json();
+  },
+
+  // FEATURE 3: Eco Score
+  getOrderEcoScore: async (orderId) => {
+    const res = await fetch(`${API_BASE}/orders/${orderId}/eco-score`);
+    return res.json();
+  },
+
+  // FEATURE 4: Vendor AI Demand Forecast & Analytics
+  getVendorDemandForecast: async (outletId) => {
+    const query = outletId ? `?outletId=${encodeURIComponent(outletId)}` : '';
+    const res = await fetch(`${API_BASE}/vendor/demand-forecast${query}`);
+    return res.json();
+  },
+  getVendorAnalytics: async (outletId) => {
+    const query = outletId ? `?outletId=${encodeURIComponent(outletId)}` : '';
+    const res = await fetch(`${API_BASE}/vendor/analytics${query}`);
+    return res.json();
   }
 };

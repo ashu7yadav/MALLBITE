@@ -22,6 +22,7 @@ import { MobileDeviceSimulator } from './components/customer/MobileDeviceSimulat
 import { AiFoodRecommendationModal } from './components/customer/AiFoodRecommendationModal';
 import { SmartAlternativeModal } from './components/customer/SmartAlternativeModal';
 import { FoodComparisonModal } from './components/customer/FoodComparisonModal';
+import { GroupFoodPlannerModal } from './components/customer/GroupFoodPlannerModal';
 import { ArchitectureModal } from './components/common/ArchitectureModal';
 
 // Standard Sub-components
@@ -36,11 +37,12 @@ import { OrderHistory } from './components/customer/OrderHistory';
 
 // Role Dashboards
 import { KitchenDashboard } from './components/restaurant/KitchenDashboard';
+import { VendorDashboard } from './components/vendor/VendorDashboard';
 import { MallDashboard } from './components/mall_admin/MallDashboard';
 import { DeliveryDashboard } from './components/delivery/DeliveryDashboard';
 import { LandingPage } from './components/landing/LandingPage';
 
-import { Sparkles, Star, Flame, Filter, Zap, ArrowRight, CheckCircle2, QrCode, Smartphone, ArrowLeft, Scale, Workflow } from 'lucide-react';
+import { Sparkles, Star, Flame, Filter, Zap, ArrowRight, CheckCircle2, QrCode, Smartphone, ArrowLeft, Scale, Workflow, ChefHat, Store, Users } from 'lucide-react';
 
 const CustomerHub = ({ 
   onOpenSearch, 
@@ -52,6 +54,7 @@ const CustomerHub = ({
   onOpenStandee,
   onOpenMobile,
   onOpenAiModal,
+  onOpenGroupPlanner,
   onOpenCompareModal,
   onOpenArchitecture,
   onTriggerAlternative,
@@ -120,6 +123,7 @@ const CustomerHub = ({
           if (el) el.scrollIntoView({ behavior: 'smooth' });
         }}
         onOpenAiModal={onOpenAiModal}
+        onOpenGroupPlanner={onOpenGroupPlanner}
         onOpenCompareModal={onOpenCompareModal}
         onOpenStandee={onOpenStandee}
       />
@@ -277,6 +281,7 @@ const MainAppContent = () => {
   const [isStandeeModalOpen, setIsStandeeModalOpen] = useState(false);
   const [isMobileSimulatorOpen, setIsMobileSimulatorOpen] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [isGroupPlannerOpen, setIsGroupPlannerOpen] = useState(false);
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
   const [isArchModalOpen, setIsArchModalOpen] = useState(false);
   const [isAltModalOpen, setIsAltModalOpen] = useState(false);
@@ -287,6 +292,7 @@ const MainAppContent = () => {
   const [customerView, setCustomerView] = useState('home'); // home | restaurant | tracker | history
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [activeNav, setActiveNav] = useState('home');
+  const [vendorViewTab, setVendorViewTab] = useState('analytics'); // analytics | kds
 
   // Close all overlay modals helper
   const closeAllModals = useCallback(() => {
@@ -294,6 +300,7 @@ const MainAppContent = () => {
     setIsStandeeModalOpen(false);
     setIsMobileSimulatorOpen(false);
     setIsAiModalOpen(false);
+    setIsGroupPlannerOpen(false);
     setIsCompareModalOpen(false);
     setIsArchModalOpen(false);
     setIsAltModalOpen(false);
@@ -419,6 +426,7 @@ const MainAppContent = () => {
             setActiveNav(navId);
             if (navId === 'home') handleBackToHome();
             else if (navId === 'orders') navigateCustomerView('history');
+            else if (navId === 'group-planner') setIsGroupPlannerOpen(true);
             else if (navId === 'ai-advisor') setIsAiModalOpen(true);
             else if (navId === 'compare') setIsCompareModalOpen(true);
             else if (navId === 'outlets') {
@@ -431,6 +439,7 @@ const MainAppContent = () => {
           }}
           onOpenStandee={() => setIsStandeeModalOpen(true)}
           onOpenAiModal={() => setIsAiModalOpen(true)}
+          onOpenGroupPlanner={() => setIsGroupPlannerOpen(true)}
           onOpenCompareModal={() => setIsCompareModalOpen(true)}
           onOpenArchitecture={() => setIsArchModalOpen(true)}
           onExploreClick={() => {
@@ -452,7 +461,7 @@ const MainAppContent = () => {
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#F95721] animate-pulse" />
               <span>
-                Viewing <strong>{currentRole === ROLES.MALL_ADMIN ? 'Mall Admin Dashboard' : currentRole === ROLES.RESTAURANT ? 'Kitchen Dashboard' : currentRole === ROLES.DELIVERY ? 'Delivery Runner Hub' : 'Pitch Landing Page'}</strong>
+                Viewing <strong>{currentRole === ROLES.MALL_ADMIN ? 'Mall Admin Dashboard' : currentRole === ROLES.RESTAURANT ? 'Vendor OS & Kitchen Hub' : currentRole === ROLES.DELIVERY ? 'Delivery Runner Hub' : 'Pitch Landing Page'}</strong>
               </span>
             </div>
             <button
@@ -472,6 +481,7 @@ const MainAppContent = () => {
           onOpenStandee={() => setIsStandeeModalOpen(true)}
           onOpenMobile={() => setIsMobileSimulatorOpen(true)}
           onOpenArchitecture={() => setIsArchModalOpen(true)}
+          onOpenGroupPlanner={() => setIsGroupPlannerOpen(true)}
           onBackToHome={handleBackToHome}
           showBack={customerView !== 'home' || currentRole !== ROLES.CUSTOMER}
         />
@@ -479,7 +489,51 @@ const MainAppContent = () => {
         {/* Dynamic Role / Main Hub View */}
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           {currentRole === ROLES.LANDING && <LandingPage />}
-          {currentRole === ROLES.RESTAURANT && <KitchenDashboard />}
+          
+          {currentRole === ROLES.RESTAURANT && (
+            <div className="space-y-4 text-left">
+              {/* Vendor OS Sub-Header Tab Switcher */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white border border-[#EFE8DE] p-4 rounded-3xl shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-[#FFF2EB] text-[#F95721] flex items-center justify-center font-bold">
+                    <Store className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-black text-[#2A2521] font-display">Vendor OS Command Center</h2>
+                    <p className="text-xs text-[#8E857C]">AI Demand Prediction, Kitchen Load & Multi-Outlet KDS Pipeline</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 bg-[#FAF7F2] p-1 rounded-2xl border border-[#EFE8DE]">
+                  <button
+                    onClick={() => setVendorViewTab('analytics')}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${
+                      vendorViewTab === 'analytics'
+                        ? 'bg-[#F95721] text-white shadow-md'
+                        : 'text-[#6F665D] hover:text-[#2A2521]'
+                    }`}
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>AI Demand & Capacity</span>
+                  </button>
+                  <button
+                    onClick={() => setVendorViewTab('kds')}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${
+                      vendorViewTab === 'kds'
+                        ? 'bg-[#2A2521] text-white shadow-md'
+                        : 'text-[#6F665D] hover:text-[#2A2521]'
+                    }`}
+                  >
+                    <ChefHat className="w-3.5 h-3.5" />
+                    <span>Live Kitchen KDS</span>
+                  </button>
+                </div>
+              </div>
+
+              {vendorViewTab === 'analytics' ? <VendorDashboard /> : <KitchenDashboard />}
+            </div>
+          )}
+
           {currentRole === ROLES.MALL_ADMIN && <MallDashboard />}
           {currentRole === ROLES.DELIVERY && <DeliveryDashboard />}
           {currentRole === ROLES.CUSTOMER && (
@@ -493,6 +547,7 @@ const MainAppContent = () => {
               onOpenStandee={() => setIsStandeeModalOpen(true)}
               onOpenMobile={() => setIsMobileSimulatorOpen(true)}
               onOpenAiModal={() => setIsAiModalOpen(true)}
+              onOpenGroupPlanner={() => setIsGroupPlannerOpen(true)}
               onOpenCompareModal={() => setIsCompareModalOpen(true)}
               onOpenArchitecture={() => setIsArchModalOpen(true)}
               onTriggerAlternative={handleTriggerAlternative}
@@ -513,6 +568,7 @@ const MainAppContent = () => {
       <MobileDeviceSimulator isOpen={isMobileSimulatorOpen} onClose={() => setIsMobileSimulatorOpen(false)} />
       
       {/* Hackathon AI & Innovation Modals */}
+      <GroupFoodPlannerModal isOpen={isGroupPlannerOpen} onClose={() => setIsGroupPlannerOpen(false)} />
       <AiFoodRecommendationModal isOpen={isAiModalOpen} onClose={() => setIsAiModalOpen(false)} />
       <SmartAlternativeModal
         isOpen={isAltModalOpen}
@@ -525,7 +581,7 @@ const MainAppContent = () => {
       <FoodComparisonModal isOpen={isCompareModalOpen} onClose={() => setIsCompareModalOpen(false)} />
       <ArchitectureModal isOpen={isArchModalOpen} onClose={() => setIsArchModalOpen(false)} />
       
-      <DemoSimulatorModal />
+      <DemoSimulatorModal onOpenGroupPlanner={() => setIsGroupPlannerOpen(true)} />
       <NotificationToast />
 
       {/* Mobile Sticky Navigation */}

@@ -12,14 +12,15 @@ import {
   MapPin,
   RefreshCw,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  ArrowLeft
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, ROLES } from '../../context/AuthContext';
 import { useMall } from '../../context/MallContext';
 import { api } from '../../services/api';
 
 export const KitchenDashboard = () => {
-  const { selectedRestaurantId, setSelectedRestaurantId } = useAuth();
+  const { selectedRestaurantId, setSelectedRestaurantId, setCurrentRole } = useAuth();
   const { restaurants, addNotification } = useMall();
 
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'menu'
@@ -102,15 +103,23 @@ export const KitchenDashboard = () => {
       
       {/* Top Header & Restaurant Switcher Bar */}
       <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-soft flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black text-xl shadow-md shadow-amber-500/25">
-            <ChefHat className="w-7 h-7" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900">
-                {currentRestaurant?.name || "Kitchen Admin"}
-              </h1>
+        <div>
+          <button
+            onClick={() => setCurrentRole(ROLES.CUSTOMER)}
+            className="inline-flex items-center gap-2 text-xs font-black text-[#2A2521] hover:text-[#F95721] mb-3 bg-[#FAF7F2] hover:bg-[#F5EFE6] px-3 py-1.5 rounded-xl border border-[#EFE8DE] transition-all hover:scale-105 active:scale-95"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-[#F95721]" />
+            <span>← Back to Customer Food Court</span>
+          </button>
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black text-xl shadow-md shadow-amber-500/25">
+              <ChefHat className="w-7 h-7" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900">
+                  {currentRestaurant?.name || "Kitchen Admin"}
+                </h1>
               <span className="bg-emerald-100 text-emerald-800 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full">
                 Live Open
               </span>
@@ -120,6 +129,7 @@ export const KitchenDashboard = () => {
             </p>
           </div>
         </div>
+      </div>
 
         {/* Outlet Switcher */}
         <div className="flex items-center gap-2 overflow-x-auto max-w-full pb-1">

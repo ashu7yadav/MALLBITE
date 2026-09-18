@@ -22,14 +22,17 @@ import {
   ChevronRight,
   Copy,
   ExternalLink,
-  Eye
+  Eye,
+  ArrowLeft
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { api } from '../../services/api';
 import { useMall } from '../../context/MallContext';
+import { useAuth, ROLES } from '../../context/AuthContext';
 
 export const MallDashboard = () => {
+  const { setCurrentRole } = useAuth();
   const { allMalls, currentMall, switchMall, switchTable, addNotification, refreshData } = useMall();
   const [analytics, setAnalytics] = useState(null);
   const [activeTab, setActiveTab] = useState('overview'); // overview | heatmap | qr | outlets | ai
@@ -150,6 +153,13 @@ export const MallDashboard = () => {
       {/* Mall Control Room Top Header */}
       <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white rounded-3xl p-6 sm:p-8 shadow-elevated border border-slate-800 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
         <div>
+          <button
+            onClick={() => setCurrentRole(ROLES.CUSTOMER)}
+            className="inline-flex items-center gap-2 text-xs font-black text-amber-300 hover:text-white mb-3 bg-white/10 hover:bg-white/20 px-3.5 py-1.5 rounded-xl border border-white/15 transition-all hover:scale-105 active:scale-95"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-brand-400" />
+            <span>← Back to Customer Food Court</span>
+          </button>
           <div className="flex items-center gap-2 text-brand-400 text-xs font-black uppercase tracking-wider mb-1.5">
             <Building2 className="w-4 h-4 text-brand-500" />
             <span>Mall Digital Infrastructure OS Control Center</span>
@@ -417,8 +427,8 @@ export const MallDashboard = () => {
           </div>
 
           {/* Orders Per Hour Chart */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-[#EFE8DE] shadow-soft">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-w-0">
+            <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-[#EFE8DE] shadow-soft min-w-0">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="font-black font-display text-base text-[#2A2521]">Orders Per Hour</h3>
@@ -429,8 +439,8 @@ export const MallDashboard = () => {
                 </span>
               </div>
 
-              <div className="h-64 sm:h-72 w-full">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-64 sm:h-72 w-full min-w-0">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                   <BarChart data={analytics.ordersPerHour}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                     <XAxis dataKey="hour" stroke="#94a3b8" fontSize={11} />
@@ -445,7 +455,7 @@ export const MallDashboard = () => {
             </div>
 
             {/* Revenue Split Breakdown */}
-            <div className="bg-white rounded-3xl p-6 border border-[#EFE8DE] shadow-soft flex flex-col justify-between">
+            <div className="bg-white rounded-3xl p-6 border border-[#EFE8DE] shadow-soft flex flex-col justify-between min-w-0">
               <div>
                 <h3 className="font-black font-display text-base text-[#2A2521] mb-1">Mall Commission Split</h3>
                 <p className="text-xs text-[#8E857C] font-medium mb-4">Automated payouts & food court billing</p>

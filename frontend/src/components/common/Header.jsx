@@ -18,7 +18,8 @@ import {
   CheckCircle2,
   SlidersHorizontal,
   ArrowLeft,
-  Workflow
+  Workflow,
+  Smartphone
 } from 'lucide-react';
 import { useMall } from '../../context/MallContext';
 import { useCart } from '../../context/CartContext';
@@ -87,70 +88,72 @@ export const Header = ({ onOpenSearch, onOpenHistory, onOpenStandee, onOpenMobil
       </div>
 
       {/* 2. Main Luxury Navbar */}
-      <div className="glass-navbar bg-white/90 backdrop-blur-xl border-b border-slate-200/70 shadow-[0_4px_25px_rgba(0,0,0,0.03)]">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-[68px] gap-3 sm:gap-6">
+      <div className="glass-navbar bg-white/95 backdrop-blur-xl border-b border-slate-200/70 shadow-[0_4px_25px_rgba(0,0,0,0.03)] w-full max-w-full overflow-hidden">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 w-full">
+          <div className="flex items-center justify-between h-16 sm:h-[68px] gap-2 sm:gap-4 min-w-0">
             
-            {/* Brand Logo & Location Pill */}
-            <div className="flex items-center gap-3 sm:gap-6 shrink-0">
-              {/* 3D Glossy Logo */}
+            {/* Brand Logo, Back Button & Location Pill */}
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
+              {/* 3D Glossy Logo - Returns to Customer Home on click */}
               <button 
-                onClick={() => setCurrentRole(ROLES.CUSTOMER)}
-                className="flex items-center gap-2.5 group text-left focus:outline-none"
+                onClick={() => {
+                  if (onBackToHome) onBackToHome();
+                  else setCurrentRole(ROLES.CUSTOMER);
+                }}
+                className="flex items-center gap-2 group text-left focus:outline-none shrink-0"
+                title="Return to Customer Home"
               >
-                <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-brand-600 via-brand-500 to-amber-400 flex items-center justify-center text-white shadow-lg shadow-brand-500/25 group-hover:scale-105 transition-all duration-300 border border-white/40 ring-2 ring-brand-500/20">
-                  <span className="text-xl sm:text-2xl font-black font-display tracking-tighter drop-shadow-sm">M</span>
-                  <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center">
+                <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-brand-600 via-brand-500 to-amber-400 flex items-center justify-center text-white shadow-md shadow-brand-500/25 group-hover:scale-105 transition-all duration-300 border border-white/40 ring-2 ring-brand-500/20">
+                  <span className="text-lg sm:text-xl font-black font-display tracking-tighter drop-shadow-sm">M</span>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center">
                     <span className="w-1 h-1 rounded-full bg-white animate-ping"></span>
                   </div>
                 </div>
                 <div className="hidden sm:block">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xl font-black font-display tracking-tight text-slate-950 flex items-center">
+                    <span className="text-lg font-black font-display tracking-tight text-slate-950 flex items-center">
                       MALL<span className="text-gradient-brand">BITE</span>
                     </span>
                     <span className="bg-brand-50 text-brand-600 text-[9px] font-black px-1.5 py-0.5 rounded border border-brand-200/60 uppercase tracking-widest">
                       OS
                     </span>
                   </div>
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 block -mt-0.5">
-                    Food Court Operating System
+                  <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400 block -mt-0.5">
+                    Food Court OS
                   </span>
                 </div>
               </button>
 
-              {/* Back to Home Button when viewing sub-pages/dashboards */}
+              {/* In-App Back Button when viewing sub-pages / sub-views */}
               {showBack && (
                 <button
                   onClick={onBackToHome}
-                  className="flex items-center gap-1.5 bg-[#FFF2EB] hover:bg-[#FFEADA] text-[#F95721] px-3.5 py-1.5 rounded-2xl text-xs font-black border border-[#F6DEC9] transition-all hover:scale-105 active:scale-95 shadow-xs shrink-0"
+                  className="flex items-center gap-1.5 bg-[#FFF2EB] hover:bg-[#FFEADA] text-[#F95721] px-2.5 sm:px-3 py-1.5 rounded-2xl text-xs font-black border border-[#F6DEC9] transition-all hover:scale-105 active:scale-95 shadow-xs shrink-0"
                   title="Back to Food Court Home"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Back to Home</span>
-                  <span className="sm:hidden">Back</span>
+                  <span className="hidden md:inline">Back</span>
                 </button>
               )}
 
               {/* Mall & Table Identification Dropdown Badge */}
-              <div className="relative group/mall">
+              <div className="relative group/mall shrink-0">
                 <button
-                  className="relative flex items-center gap-2.5 bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/90 hover:border-brand-300 rounded-2xl px-3 sm:px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-all text-left shadow-sm hover:shadow cursor-pointer"
+                  className="relative flex items-center gap-2 bg-slate-50/90 hover:bg-slate-100/90 border border-slate-200/90 hover:border-brand-300 rounded-2xl px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-700 transition-all text-left shadow-sm hover:shadow cursor-pointer"
                   title="Click to switch Mall or Table"
                 >
-                  <div className="relative w-7 h-7 rounded-xl bg-gradient-to-tr from-brand-500 to-amber-400 text-white flex items-center justify-center shrink-0 shadow-sm">
-                    <MapPin className="w-4 h-4 text-white" />
-                    <span className="radar-ping-ring"></span>
+                  <div className="relative w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-gradient-to-tr from-brand-500 to-amber-400 text-white flex items-center justify-center shrink-0 shadow-sm">
+                    <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-[9px] text-brand-600 uppercase font-black tracking-wider leading-none flex items-center gap-1">
-                      {currentMall.name.split(' ')[0]} {currentMall.name.split(' ')[1]} <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[9px] text-brand-600 uppercase font-black tracking-wider leading-none flex items-center gap-1 truncate">
+                      {currentMall.name.split(' ')[0]} <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
                     </span>
                     <div className="flex items-center gap-1 mt-0.5">
-                      <span className="font-extrabold font-display text-slate-900 text-xs sm:text-[13px] tracking-tight">
-                        Table {currentTable.number} • {currentTable.zone ? currentTable.zone.split('(')[0] : 'Food Court'}
+                      <span className="font-extrabold font-display text-slate-900 text-xs tracking-tight truncate">
+                        Table {currentTable.number || 'A17'}
                       </span>
-                      <ChevronDown className="w-3 h-3 text-slate-400 group-hover/mall:text-brand-500 transition-transform group-hover/mall:translate-y-0.5" />
+                      <ChevronDown className="w-3 h-3 text-slate-400 group-hover/mall:text-brand-500 transition-transform group-hover/mall:translate-y-0.5 shrink-0" />
                     </div>
                   </div>
                 </button>
@@ -233,24 +236,24 @@ export const Header = ({ onOpenSearch, onOpenHistory, onOpenStandee, onOpenMobil
 
 
             {/* AI Search Bar (Desktop) */}
-            <div className="hidden md:flex flex-1 max-w-lg mx-2">
+            <div className="hidden md:flex flex-1 min-w-0 max-w-xs md:max-w-sm lg:max-w-md mx-2">
               <button
                 onClick={onOpenSearch}
-                className="w-full relative flex items-center justify-between bg-slate-100/70 hover:bg-slate-100/90 border border-slate-200/90 hover:border-brand-400/80 text-slate-500 rounded-2xl px-4 py-2 text-sm transition-all focus:outline-none hover:shadow-sm group overflow-hidden"
+                className="w-full relative flex items-center justify-between bg-slate-100/70 hover:bg-slate-100/90 border border-slate-200/90 hover:border-brand-400/80 text-slate-500 rounded-2xl px-3 sm:px-4 py-2 text-sm transition-all focus:outline-none hover:shadow-sm group overflow-hidden"
               >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <Search className="w-4 h-4 text-slate-400 group-hover:text-brand-500 transition-colors shrink-0" />
-                  <span className="text-xs text-slate-500 font-medium truncate transition-all duration-300 text-left">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-500 transition-colors shrink-0" />
+                  <span className="text-xs text-slate-500 font-medium truncate text-left">
                     {SEARCH_PLACEHOLDERS[placeholderIndex]}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                  <span className="flex items-center gap-1 text-[11px] font-extrabold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-xl border border-brand-200/70 shadow-sm">
+                <div className="flex items-center gap-1 shrink-0 ml-1.5">
+                  <span className="flex items-center gap-1 text-[10px] font-extrabold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-lg border border-brand-200/70 shadow-2xs">
                     <Sparkles className="w-3 h-3 text-brand-500 animate-pulse" />
-                    AI Smart
+                    AI
                   </span>
-                  <span className="hidden lg:inline-block bg-slate-200/70 text-slate-400 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                  <span className="hidden xl:inline-block bg-slate-200/70 text-slate-400 text-[9px] font-bold px-1.5 py-0.5 rounded">
                     ⌘K
                   </span>
                 </div>
@@ -258,93 +261,108 @@ export const Header = ({ onOpenSearch, onOpenHistory, onOpenStandee, onOpenMobil
             </div>
 
             {/* Right Action Icons & Role Switcher */}
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
               {/* Search Icon (Mobile) */}
               <button
                 onClick={onOpenSearch}
                 className="md:hidden p-2 text-slate-600 hover:text-brand-500 hover:bg-slate-100 rounded-xl transition-colors"
                 aria-label="Search"
               >
-                <Search className="w-5 h-5" />
+                <Search className="w-4 h-4" />
               </button>
 
-              {/* Acrylic Standee QR View Button */}
-              {onOpenStandee && (
+              {/* Hackathon Tools Dropdown (Standee QR, Mobile Simulator, Tech Architecture, Scan QR) */}
+              <div className="relative group/tools">
                 <button
-                  onClick={onOpenStandee}
-                  className="hidden md:flex items-center gap-1.5 bg-[#FFF2EB] hover:bg-[#FFEADA] text-[#F95721] px-3 py-2 rounded-2xl text-xs font-black transition-all hover:scale-105 active:scale-95 border border-[#F6DEC9] shadow-xs"
-                  title="View Acrylic Table Standee QR"
+                  className="flex items-center gap-1 bg-[#FFF2EB] hover:bg-[#FFEADA] text-[#F95721] px-2.5 sm:px-3 py-1.5 rounded-2xl text-xs font-black transition-all border border-[#F6DEC9] shadow-2xs shrink-0 active:scale-95"
+                  title="Hackathon Demo & Evaluation Tools"
                 >
-                  <QrCode className="w-3.5 h-3.5" />
-                  <span>Standee QR</span>
+                  <Sparkles className="w-3.5 h-3.5 text-[#F95721] animate-pulse" />
+                  <span className="hidden sm:inline">Demo Tools</span>
+                  <ChevronDown className="w-3 h-3 text-[#F95721] group-hover/tools:rotate-180 transition-transform" />
                 </button>
-              )}
 
-              {/* Mobile Simulator Preview Button */}
-              {onOpenMobile && (
-                <button
-                  onClick={onOpenMobile}
-                  className="hidden xl:flex items-center gap-1.5 bg-white hover:bg-[#FAF7F2] text-[#2A2521] px-3 py-2 rounded-2xl text-xs font-bold transition-all hover:scale-105 active:scale-95 border border-[#EFE8DE] shadow-xs"
-                  title="View Mobile App Frame Simulator"
-                >
-                  <span>📱 Mobile View</span>
-                </button>
-              )}
-
-              {/* Technical Architecture Modal Trigger for Judges */}
-              {onOpenArchitecture && (
-                <button
-                  onClick={onOpenArchitecture}
-                  className="hidden xl:flex items-center gap-1.5 bg-[#2A2521] hover:bg-black text-[#F3ECE0] px-3 py-2 rounded-2xl text-xs font-black transition-all hover:scale-105 active:scale-95 border border-[#3D352E] shadow-xs"
-                  title="View System Architecture & Data Pipeline"
-                >
-                  <Workflow className="w-3.5 h-3.5 text-[#F95721]" />
-                  <span>Architecture</span>
-                </button>
-              )}
-
-              {/* QR Scan Button */}
-              <button
-                onClick={() => setIsQrScannerOpen(true)}
-                className="hidden sm:flex items-center gap-1.5 bg-white hover:bg-[#FAF7F2] border border-[#EFE8DE] text-[#2A2521] px-3.5 py-2 rounded-2xl text-xs font-bold transition-all hover:scale-105 active:scale-95 shadow-xs"
-                title="Scan Table QR Code"
-              >
-                <QrCode className="w-4 h-4 text-[#F95721]" />
-                <span>Scan QR</span>
-              </button>
+                <div className="absolute right-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-elevated border border-slate-100 p-2 hidden group-hover/tools:block transition-all z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="px-2.5 py-1 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                    Judge Evaluation Tools
+                  </div>
+                  <div className="space-y-1 mt-1">
+                    {onOpenStandee && (
+                      <button
+                        onClick={onOpenStandee}
+                        className="w-full flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-[#FFF4EC] hover:text-[#F95721] text-left transition-all"
+                      >
+                        <QrCode className="w-4 h-4 text-[#F95721]" />
+                        <span>Table Standee QR</span>
+                      </button>
+                    )}
+                    {onOpenMobile && (
+                      <button
+                        onClick={onOpenMobile}
+                        className="w-full flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-[#FFF4EC] hover:text-[#F95721] text-left transition-all"
+                      >
+                        <Smartphone className="w-4 h-4 text-[#F95721]" />
+                        <span>iPhone Frame Simulator</span>
+                      </button>
+                    )}
+                    {onOpenArchitecture && (
+                      <button
+                        onClick={onOpenArchitecture}
+                        className="w-full flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-[#FFF4EC] hover:text-[#F95721] text-left transition-all"
+                      >
+                        <Workflow className="w-4 h-4 text-[#F95721]" />
+                        <span>Tech Architecture (Judges)</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setIsQrScannerOpen(true)}
+                      className="w-full flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-[#FFF4EC] hover:text-[#F95721] text-left transition-all"
+                    >
+                      <QrCode className="w-4 h-4 text-[#F95721]" />
+                      <span>Scan Table QR Code</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
 
               {/* Multi-Restaurant Unified Cart Button */}
               <button
                 onClick={() => setIsCartDrawerOpen(true)}
-                className="relative flex items-center gap-2 bg-gradient-to-r from-[#F95721] to-[#EA580C] hover:from-[#EA580C] hover:to-[#C94112] text-white px-3.5 sm:px-4 py-2 rounded-2xl font-black text-xs sm:text-sm shadow-md shadow-[#F95721]/25 transition-all hover:scale-105 active:scale-95 border border-white/20 shine-effect"
+                className="relative flex items-center gap-1.5 bg-gradient-to-r from-[#F95721] to-[#EA580C] hover:from-[#EA580C] hover:to-[#C94112] text-white px-3 sm:px-3.5 py-1.5 rounded-2xl font-black text-xs sm:text-sm shadow-md shadow-[#F95721]/25 transition-all hover:scale-105 active:scale-95 border border-white/20 shrink-0"
               >
-                <ShoppingBag className="w-4 h-4" />
+                <ShoppingBag className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline font-display">Cart</span>
                 {totalItemsCount > 0 ? (
-                  <span className="bg-white text-[#F95721] font-black text-xs px-2 py-0.5 rounded-full shadow-inner animate-bounce">
+                  <span className="bg-white text-[#F95721] font-black text-xs px-1.5 py-0.2 rounded-full shadow-inner">
                     {totalItemsCount}
                   </span>
                 ) : (
-                  <span className="hidden md:inline text-[11px] text-white/80 font-normal">
+                  <span className="hidden sm:inline text-[11px] text-white/80 font-normal">
                     (0)
                   </span>
                 )}
               </button>
 
-              {/* User Profile Avatar & Greeting (Matches user design: "Hi, Ashutosh") */}
-              <div className="hidden lg:flex items-center gap-2 px-2.5 py-1 bg-[#FAF7F2] rounded-2xl border border-[#EFE8DE]">
-                <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-                  alt="Ashutosh"
-                  className="w-7 h-7 rounded-full object-cover border border-[#E4D9C8]"
-                />
-                <span className="text-xs font-extrabold text-[#2A2521]">Hi, Ashutosh</span>
-              </div>
+              {/* Prominent Back to Customer Menu button when viewing any dashboard */}
+              {currentRole !== ROLES.CUSTOMER && (
+                <button
+                  onClick={() => {
+                    if (onBackToHome) onBackToHome();
+                    else setCurrentRole(ROLES.CUSTOMER);
+                  }}
+                  className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 sm:px-3 py-1.5 rounded-2xl text-xs font-black shadow-sm transition-all hover:scale-105 active:scale-95 shrink-0"
+                  title="Return to Customer Food Court"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Back to Customer</span>
+                  <span className="sm:hidden">Back</span>
+                </button>
+              )}
 
               {/* Role Switcher Menu */}
-              <div className="relative group">
+              <div className="relative group/role shrink-0">
                 <button 
-                  className="flex items-center gap-2 bg-[#2A2521] hover:bg-black text-white px-3 sm:px-3.5 py-2 rounded-2xl text-xs font-bold transition-all shadow-md shadow-[#2A2521]/15 border border-[#3D352E]"
+                  className="flex items-center gap-1.5 bg-[#2A2521] hover:bg-black text-white px-2.5 sm:px-3 py-1.5 rounded-2xl text-xs font-bold transition-all shadow-md shadow-[#2A2521]/15 border border-[#3D352E] shrink-0"
                 >
                   {currentRole === ROLES.CUSTOMER && <User className="w-3.5 h-3.5 text-emerald-400" />}
                   {currentRole === ROLES.RESTAURANT && <Store className="w-3.5 h-3.5 text-amber-400" />}
@@ -355,11 +373,11 @@ export const Header = ({ onOpenSearch, onOpenHistory, onOpenStandee, onOpenMobil
                   <span className="capitalize hidden sm:inline font-display">
                     {currentRole === ROLES.MALL_ADMIN ? 'Mall Admin' : currentRole === ROLES.RESTAURANT ? 'Kitchen' : currentRole === ROLES.DELIVERY ? 'Runner' : currentRole === ROLES.LANDING ? 'Pitch' : 'Customer'}
                   </span>
-                  <ChevronDown className="w-3 h-3 text-slate-400 group-hover:text-white transition-transform group-hover:rotate-180" />
+                  <ChevronDown className="w-3 h-3 text-slate-400 group-hover/role:text-white transition-transform group-hover/role:rotate-180" />
                 </button>
 
                 {/* Dropdown Options */}
-                <div className="absolute right-0 mt-2 w-64 bg-white/95 backdrop-blur-xl rounded-3xl shadow-elevated border border-slate-100 p-2 hidden group-hover:block transition-all z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="absolute right-0 mt-2 w-64 bg-white/95 backdrop-blur-xl rounded-3xl shadow-elevated border border-slate-100 p-2 hidden group-hover/role:block transition-all z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="px-3 py-2 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center justify-between">
                     <span>Switch Role Interface</span>
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>

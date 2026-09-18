@@ -10,13 +10,16 @@ import {
   Navigation, 
   ArrowRight,
   ShieldCheck,
-  Check
+  Check,
+  ArrowLeft
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { api } from '../../services/api';
 import { useMall } from '../../context/MallContext';
+import { useAuth, ROLES } from '../../context/AuthContext';
 
 export const DeliveryDashboard = () => {
+  const { setCurrentRole } = useAuth();
   const { addNotification } = useMall();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,13 +65,21 @@ export const DeliveryDashboard = () => {
       
       {/* Runner Profile Header */}
       <div className="bg-slate-900 text-white rounded-3xl p-6 shadow-soft flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md">
-            <Bike className="w-7 h-7" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-black text-white">Rohan Verma</h1>
+        <div>
+          <button
+            onClick={() => setCurrentRole(ROLES.CUSTOMER)}
+            className="inline-flex items-center gap-2 text-xs font-black text-amber-300 hover:text-white mb-3 bg-white/10 hover:bg-white/20 px-3.5 py-1.5 rounded-xl border border-white/15 transition-all hover:scale-105 active:scale-95"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-brand-400" />
+            <span>← Back to Customer Food Court</span>
+          </button>
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md">
+              <Bike className="w-7 h-7" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-black text-white">Rohan Verma</h1>
               <span className="bg-emerald-500 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-full">
                 Active On-Duty
               </span>
@@ -78,6 +89,7 @@ export const DeliveryDashboard = () => {
             </p>
           </div>
         </div>
+      </div>
 
         <div className="text-left sm:text-right bg-white/10 px-4 py-2 rounded-2xl">
           <span className="text-[10px] uppercase font-bold text-slate-400 block">Active Drop Tasks</span>

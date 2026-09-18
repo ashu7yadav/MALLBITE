@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { AuthProvider, useAuth, ROLES } from './context/AuthContext';
 import { MallProvider, useMall } from './context/MallContext';
 import { CartProvider, useCart } from './context/CartContext';
@@ -54,17 +54,24 @@ const CustomerHub = ({
   onOpenAiModal,
   onOpenCompareModal,
   onOpenArchitecture,
-  onTriggerAlternative
+  onTriggerAlternative,
+  onSelectRestaurant,
+  onBackToHome,
+  navigateCustomerView
 }) => {
   const { restaurants, currentTable } = useMall();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedMaxWait, setSelectedMaxWait] = useState(null);
   const [filterType, setFilterType] = useState('all'); // all | veg | rating
 
-  const handleSelectRestaurant = (rest) => {
-    setSelectedRestaurant(rest);
-    setCustomerView('restaurant');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleOutletClick = (rest) => {
+    if (onSelectRestaurant) {
+      onSelectRestaurant(rest);
+    } else {
+      setSelectedRestaurant(rest);
+      setCustomerView('restaurant');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const filteredRestaurants = restaurants.filter(rest => {
@@ -82,20 +89,23 @@ const CustomerHub = ({
     return (
       <RestaurantDetail
         restaurant={selectedRestaurant}
-        onBack={() => setCustomerView('home')}
+        onBack={onBackToHome}
       />
     );
   }
 
   if (customerView === 'tracker') {
-    return <LiveOrderTracker onBackToHome={() => setCustomerView('home')} />;
+    return <LiveOrderTracker onBackToHome={onBackToHome} />;
   }
 
   if (customerView === 'history') {
     return (
       <OrderHistory
-        onSelectOrder={() => setCustomerView('tracker')}
-        onBack={() => setCustomerView('home')}
+        onSelectOrder={() => {
+          if (navigateCustomerView) navigateCustomerView('tracker');
+          else setCustomerView('tracker');
+        }}
+        onBack={onBackToHome}
       />
     );
   }
@@ -118,7 +128,7 @@ const CustomerHub = ({
       <PopularOutletsRow
         onSelectOutlet={(outlet) => {
           const match = restaurants.find(r => r.name.toLowerCase().includes(outlet.name.toLowerCase().split(' ')[0])) || restaurants[0];
-          handleSelectRestaurant(match);
+          handleOutletClick(match);
         }}
         onViewAll={() => {
           const el = document.getElementById('restaurants-grid');
@@ -250,7 +260,7 @@ const CustomerHub = ({
             <RestaurantCard
               key={restaurant.id}
               restaurant={restaurant}
-              onSelect={handleSelectRestaurant}
+              onSelect={handleOutletClick}
             />
           ))}
         </div>
@@ -262,6 +272,7 @@ const CustomerHub = ({
 
 const MainAppContent = () => {
   const { currentRole, setCurrentRole } = useAuth();
+  const { restaurants } = useMall();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isStandeeModalOpen, setIsStandeeModalOpen] = useState(false);
   const [isMobileSimulatorOpen, setIsMobileSimulatorOpen] = useState(false);
@@ -276,6 +287,118 @@ const MainAppContent = () => {
   const [customerView, setCustomerView] = useState('home'); // home | restaurant | tracker | history
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [activeNav, setActiveNav] = useState('home');
+
+  // Close all overlay modals helper
+  const closeAllModals = useCallback(() => {
+    setIsSearchOpen(false);
+    setIsStandeeModalOpen(false);
+    setIsMobileSimulatorOpen(false);
+    setIsAiModalOpen(false);
+    setIsCompareModalOpen(false);
+    setIsArchModalOpen(false);
+    setIsAltModalOpen(false);
+  }, []);
+
+  // Back to Customer Home Handler
+  const handleBackToHome = useCallback(() => {
+    closeAllModals();
+    setCurrentRole(ROLES.CUSTOMER);
+    setCustomerView('home');
+    setSelectedRestaurant(null);
+    setActiveNav('home');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    try {
+      if (window.history.state && (window.history.state.view !== 'home' || window.history.state.role !== ROLES.CUSTOMER)) {
+        window.history.pushState({ role: ROLES.CUSTOMER, view: 'home' }, '', window.location.pathname);
+      }
+    } catch {
+      // Ignore if history API restricted
+    }
+  }, [setCurrentRole, closeAllModals]);
+
+  // Navigate customer sub-views with browser history support
+  const navigateCustomerView = useCallback((newView, rest = null) => {
+    closeAllModals();
+    setCurrentRole(ROLES.CUSTOMER);
+    setCustomerView(newView);
+    if (newView === 'restaurant') {
+      setSelectedRestaurant(rest);
+    } else {
+      setSelectedRestaurant(null);
+    }
+    if (newView === 'home') setActiveNav('home');
+    else if (newView === 'history') setActiveNav('orders');
+
+    try {
+      window.history.pushState(
+        { role: ROLES.CUSTOMER, view: newView, restaurantId: rest?.id || null },
+        '',
+        window.location.pathname
+      );
+    } catch {
+      // Ignore
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [setCurrentRole, closeAllModals]);
+
+  const handleSelectRestaurant = useCallback((rest) => {
+    navigateCustomerView('restaurant', rest);
+  }, [navigateCustomerView]);
+
+  // Handle switching roles with history support
+  const handleSwitchRole = useCallback((newRole) => {
+    closeAllModals();
+    setCurrentRole(newRole);
+    setCustomerView('home');
+    setSelectedRestaurant(null);
+    try {
+      window.history.pushState({ role: newRole, view: 'home' }, '', window.location.pathname);
+    } catch {
+      // Ignore
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [setCurrentRole, closeAllModals]);
+
+  // Browser Back Button (popstate) sync
+  useEffect(() => {
+    try {
+      if (!window.history.state) {
+        window.history.replaceState({ role: ROLES.CUSTOMER, view: 'home' }, '', window.location.pathname);
+      }
+    } catch {
+      // Ignore
+    }
+
+    const handlePopState = (e) => {
+      closeAllModals();
+      const state = e.state;
+      if (state) {
+        if (state.role && state.role !== currentRole) {
+          setCurrentRole(state.role);
+        }
+        if (state.view) {
+          setCustomerView(state.view);
+          if (state.view === 'restaurant' && state.restaurantId) {
+            const found = restaurants.find(r => r.id === state.restaurantId);
+            if (found) setSelectedRestaurant(found);
+          } else if (state.view !== 'restaurant') {
+            setSelectedRestaurant(null);
+          }
+        } else {
+          setCustomerView('home');
+          setSelectedRestaurant(null);
+        }
+      } else {
+        setCurrentRole(ROLES.CUSTOMER);
+        setCustomerView('home');
+        setSelectedRestaurant(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [currentRole, setCurrentRole, restaurants, closeAllModals]);
 
   const handleTriggerAlternative = (dish, fasterList, targetWait, userMaxWait) => {
     setAltTargetItem(dish);
@@ -294,14 +417,16 @@ const MainAppContent = () => {
           activeNav={activeNav}
           onSelectNav={(navId) => {
             setActiveNav(navId);
-            if (navId === 'home') setCustomerView('home');
-            else if (navId === 'orders') setCustomerView('history');
+            if (navId === 'home') handleBackToHome();
+            else if (navId === 'orders') navigateCustomerView('history');
             else if (navId === 'ai-advisor') setIsAiModalOpen(true);
             else if (navId === 'compare') setIsCompareModalOpen(true);
             else if (navId === 'outlets') {
-              setCustomerView('home');
-              const el = document.getElementById('restaurants-grid');
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
+              if (customerView !== 'home') handleBackToHome();
+              setTimeout(() => {
+                const el = document.getElementById('restaurants-grid');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }, 100);
             }
           }}
           onOpenStandee={() => setIsStandeeModalOpen(true)}
@@ -309,8 +434,11 @@ const MainAppContent = () => {
           onOpenCompareModal={() => setIsCompareModalOpen(true)}
           onOpenArchitecture={() => setIsArchModalOpen(true)}
           onExploreClick={() => {
-            const el = document.getElementById('recommended-grid');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
+            if (customerView !== 'home') handleBackToHome();
+            setTimeout(() => {
+              const el = document.getElementById('recommended-grid');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
           }}
         />
       )}
@@ -318,9 +446,9 @@ const MainAppContent = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         
-        {/* Top Notification Bar when in other Role Dashboards with Instant Back Option */}
+        {/* Top Sticky Notification Bar when in other Role Dashboards with Instant Back Option */}
         {currentRole !== ROLES.CUSTOMER && (
-          <div className="bg-[#FFF4EC] border-b border-[#F6DEC9] py-2.5 px-4 sm:px-6 flex items-center justify-between text-xs font-bold text-[#6F665D] z-30">
+          <div className="sticky top-0 z-50 bg-[#2A2521] text-white border-b border-[#3D352E] py-2.5 px-4 sm:px-6 flex items-center justify-between text-xs font-bold shadow-md">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#F95721] animate-pulse" />
               <span>
@@ -328,11 +456,8 @@ const MainAppContent = () => {
               </span>
             </div>
             <button
-              onClick={() => {
-                setCurrentRole(ROLES.CUSTOMER);
-                setCustomerView('home');
-              }}
-              className="flex items-center gap-1.5 bg-[#F95721] hover:bg-[#EA580C] text-white px-3.5 py-1.5 rounded-xl text-xs font-black shadow-xs active:scale-95 transition-all"
+              onClick={handleBackToHome}
+              className="flex items-center gap-1.5 bg-[#F95721] hover:bg-[#EA580C] text-white px-3.5 py-1.5 rounded-xl text-xs font-black shadow-sm active:scale-95 transition-all"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back to Customer Menu</span>
@@ -343,15 +468,11 @@ const MainAppContent = () => {
         {/* Top Universal Header with Search, User Profile, Standee and Mobile Triggers */}
         <Header
           onOpenSearch={() => setIsSearchOpen(true)}
-          onOpenHistory={() => setCustomerView('history')}
+          onOpenHistory={() => navigateCustomerView('history')}
           onOpenStandee={() => setIsStandeeModalOpen(true)}
           onOpenMobile={() => setIsMobileSimulatorOpen(true)}
           onOpenArchitecture={() => setIsArchModalOpen(true)}
-          onBackToHome={() => {
-            setCustomerView('home');
-            setCurrentRole(ROLES.CUSTOMER);
-            setSelectedRestaurant(null);
-          }}
+          onBackToHome={handleBackToHome}
           showBack={customerView !== 'home' || currentRole !== ROLES.CUSTOMER}
         />
 
@@ -364,7 +485,7 @@ const MainAppContent = () => {
           {currentRole === ROLES.CUSTOMER && (
             <CustomerHub
               onOpenSearch={() => setIsSearchOpen(true)}
-              onOpenHistory={() => setCustomerView('history')}
+              onOpenHistory={() => navigateCustomerView('history')}
               selectedRestaurant={selectedRestaurant}
               setSelectedRestaurant={setSelectedRestaurant}
               customerView={customerView}
@@ -375,6 +496,9 @@ const MainAppContent = () => {
               onOpenCompareModal={() => setIsCompareModalOpen(true)}
               onOpenArchitecture={() => setIsArchModalOpen(true)}
               onTriggerAlternative={handleTriggerAlternative}
+              onSelectRestaurant={handleSelectRestaurant}
+              onBackToHome={handleBackToHome}
+              navigateCustomerView={navigateCustomerView}
             />
           )}
         </main>
@@ -382,7 +506,7 @@ const MainAppContent = () => {
 
       {/* Global Modals & Simulators */}
       <MultiCartDrawer />
-      <CheckoutModal onOrderSuccess={() => setCustomerView('tracker')} />
+      <CheckoutModal onOrderSuccess={() => navigateCustomerView('tracker')} />
       <SmartAISearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
       <QrScannerModal />
       <QrStandeeModal isOpen={isStandeeModalOpen} onClose={() => setIsStandeeModalOpen(false)} />
@@ -408,11 +532,11 @@ const MainAppContent = () => {
       <BottomNav
         activeTab={customerView}
         setActiveTab={(tab) => {
-          if (tab === 'home') setCustomerView('home');
-          if (tab === 'orders') setCustomerView('history');
+          if (tab === 'home') handleBackToHome();
+          if (tab === 'orders') navigateCustomerView('history');
         }}
         onOpenSearch={() => setIsSearchOpen(true)}
-        onOpenHistory={() => setCustomerView('history')}
+        onOpenHistory={() => navigateCustomerView('history')}
       />
     </div>
   );

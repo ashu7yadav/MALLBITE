@@ -178,6 +178,64 @@ export const MallProvider = ({ children }) => {
     }
   };
 
+  const scanQrPayload = async (rawPayload) => {
+    if (!rawPayload || typeof rawPayload !== 'string') return null;
+    let text = rawPayload.trim();
+    let targetMall = currentMall.id;
+    let targetTable = null;
+
+    // Check if JSON
+    if (text.startsWith('{') && text.endsWith('}')) {
+      try {
+        const parsed = JSON.parse(text);
+        if (parsed.table) targetTable = parsed.table;
+        if (parsed.mall || parsed.mallId) targetMall = parsed.mall || parsed.mallId;
+      } catch {}
+    }
+
+    // Check if URL or contains query params
+    if (!targetTable && (text.includes('http://') || text.includes('https://') || text.includes('?') || text.includes('&'))) {
+      try {
+        const urlStr = text.startsWith('http') ? text : `https://dummy.app/${text.startsWith('/') ? text.slice(1) : text}`;
+        const url = new URL(urlStr);
+        const tParam = url.searchParams.get('table') || url.searchParams.get('t');
+        const mParam = url.searchParams.get('mall') || url.searchParams.get('m');
+        if (tParam) targetTable = tParam;
+        if (mParam) targetMall = mParam;
+      } catch {}
+    }
+
+    // Check if MALLBITE QR code pattern (e.g. MALLBITE-CITY-L3-A12 or MALLBITE-PHX-L2-A24)
+    if (!targetTable && text.toUpperCase().startsWith('MALLBITE-')) {
+      const parts = text.split('-');
+      if (parts[1]) {
+        const code = parts[1].toLowerCase();
+        if (code === 'city') targetMall = 'mall-city';
+        else if (code === 'phx') targetMall = 'mall-1';
+        else if (code === 'dlf') targetMall = 'mall-dlf';
+        else if (code === 'ambience') targetMall = 'mall-ambience';
+      }
+      targetTable = text;
+    }
+
+    // Plain table input fallback
+    if (!targetTable) {
+      targetTable = text.replace(/^table\s+/i, '');
+    }
+
+    // Switch mall if different
+    if (targetMall && targetMall !== currentMall.id) {
+      const foundMall = allMalls.find(m => m.id === targetMall || m.id.toLowerCase() === targetMall.toLowerCase());
+      if (foundMall) {
+        setCurrentMall(foundMall);
+      }
+    }
+
+    await switchTable(targetTable, targetMall);
+    playChime('order');
+    return { success: true, table: targetTable, mall: targetMall };
+  };
+
   return (
     <MallContext.Provider
       value={{
@@ -188,6 +246,7 @@ export const MallProvider = ({ children }) => {
         currentTable,
         setCurrentTable,
         switchTable,
+        scanQrPayload,
         restaurants,
         setRestaurants,
         categories,

@@ -23,14 +23,14 @@ import { useCart } from '../../context/CartContext';
 import { useAuth, ROLES } from '../../context/AuthContext';
 
 const SEARCH_PLACEHOLDERS = [
-  'Search "🍔 Truffle Burger, 🍕 Farmhouse Pizza..."',
-  'Try AI: "Spicy meal under ₹250 for two..."',
-  'Search "☕ Iced Hazelnut Cold Coffee..."',
-  'Try AI: "Pure veg quick bite in 10 mins..."',
-  'Search "🌮 Crispy Tacos, 🥟 Steamed Dimsums..."'
+  'Search for cuisines, dishes or restaurants...',
+  'Search "🍔 Vegan Crunch Burger, 🍕 Farmhouse Pizza..."',
+  'Try AI: "Organic quinoa bowl under ₹300..."',
+  'Search "🥤 Berry Blast Smoothie, 🥗 Sesame Salad..."',
+  'Try AI: "Pure veg quick bite in 10 mins..."'
 ];
 
-export const Header = ({ onOpenSearch, onOpenHistory }) => {
+export const Header = ({ onOpenSearch, onOpenHistory, onOpenStandee, onOpenMobile }) => {
   const { currentMall, currentTable, setIsQrScannerOpen, setIsDemoModalOpen } = useMall();
   const { totalItemsCount, cartSubtotal, setIsCartDrawerOpen } = useCart();
   const { currentRole, setCurrentRole } = useAuth();
@@ -253,25 +253,48 @@ export const Header = ({ onOpenSearch, onOpenHistory }) => {
                 <Search className="w-5 h-5" />
               </button>
 
+              {/* Acrylic Standee QR View Button */}
+              {onOpenStandee && (
+                <button
+                  onClick={onOpenStandee}
+                  className="hidden md:flex items-center gap-1.5 bg-[#FFF2EB] hover:bg-[#FFEADA] text-[#F95721] px-3 py-2 rounded-2xl text-xs font-black transition-all hover:scale-105 active:scale-95 border border-[#F6DEC9] shadow-xs"
+                  title="View Acrylic Table Standee QR"
+                >
+                  <QrCode className="w-3.5 h-3.5" />
+                  <span>Standee QR</span>
+                </button>
+              )}
+
+              {/* Mobile Simulator Preview Button */}
+              {onOpenMobile && (
+                <button
+                  onClick={onOpenMobile}
+                  className="hidden xl:flex items-center gap-1.5 bg-white hover:bg-[#FAF7F2] text-[#2A2521] px-3 py-2 rounded-2xl text-xs font-bold transition-all hover:scale-105 active:scale-95 border border-[#EFE8DE] shadow-xs"
+                  title="View Mobile App Frame Simulator"
+                >
+                  <span>📱 Mobile View</span>
+                </button>
+              )}
+
               {/* QR Scan Button */}
               <button
                 onClick={() => setIsQrScannerOpen(true)}
-                className="hidden lg:flex items-center gap-1.5 bg-slate-100/80 hover:bg-slate-200/80 border border-slate-200 text-slate-700 px-3.5 py-2 rounded-2xl text-xs font-bold transition-all hover:scale-105 active:scale-95 shadow-sm"
+                className="hidden sm:flex items-center gap-1.5 bg-white hover:bg-[#FAF7F2] border border-[#EFE8DE] text-[#2A2521] px-3.5 py-2 rounded-2xl text-xs font-bold transition-all hover:scale-105 active:scale-95 shadow-xs"
                 title="Scan Table QR Code"
               >
-                <QrCode className="w-4 h-4 text-brand-500" />
+                <QrCode className="w-4 h-4 text-[#F95721]" />
                 <span>Scan QR</span>
               </button>
 
               {/* Multi-Restaurant Unified Cart Button */}
               <button
                 onClick={() => setIsCartDrawerOpen(true)}
-                className="relative flex items-center gap-2 bg-gradient-to-r from-brand-500 via-orange-500 to-amber-500 hover:from-brand-600 hover:to-amber-600 text-white px-3.5 sm:px-4 py-2 rounded-2xl font-black text-xs sm:text-sm shadow-md shadow-brand-500/25 transition-all hover:scale-105 active:scale-95 border border-white/20 shine-effect"
+                className="relative flex items-center gap-2 bg-gradient-to-r from-[#F95721] to-[#EA580C] hover:from-[#EA580C] hover:to-[#C94112] text-white px-3.5 sm:px-4 py-2 rounded-2xl font-black text-xs sm:text-sm shadow-md shadow-[#F95721]/25 transition-all hover:scale-105 active:scale-95 border border-white/20 shine-effect"
               >
                 <ShoppingBag className="w-4 h-4" />
-                <span className="hidden sm:inline font-display">Multi-Cart</span>
+                <span className="hidden sm:inline font-display">Cart</span>
                 {totalItemsCount > 0 ? (
-                  <span className="bg-white text-brand-600 font-black text-xs px-2 py-0.5 rounded-full shadow-inner animate-bounce">
+                  <span className="bg-white text-[#F95721] font-black text-xs px-2 py-0.5 rounded-full shadow-inner animate-bounce">
                     {totalItemsCount}
                   </span>
                 ) : (
@@ -281,10 +304,20 @@ export const Header = ({ onOpenSearch, onOpenHistory }) => {
                 )}
               </button>
 
+              {/* User Profile Avatar & Greeting (Matches user design: "Hi, Ashutosh") */}
+              <div className="hidden lg:flex items-center gap-2 px-2.5 py-1 bg-[#FAF7F2] rounded-2xl border border-[#EFE8DE]">
+                <img
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+                  alt="Ashutosh"
+                  className="w-7 h-7 rounded-full object-cover border border-[#E4D9C8]"
+                />
+                <span className="text-xs font-extrabold text-[#2A2521]">Hi, Ashutosh</span>
+              </div>
+
               {/* Role Switcher Menu */}
               <div className="relative group">
                 <button 
-                  className="flex items-center gap-2 bg-slate-950 hover:bg-slate-900 text-white px-3 sm:px-3.5 py-2 rounded-2xl text-xs font-bold transition-all shadow-md shadow-slate-950/20 border border-slate-800"
+                  className="flex items-center gap-2 bg-[#2A2521] hover:bg-black text-white px-3 sm:px-3.5 py-2 rounded-2xl text-xs font-bold transition-all shadow-md shadow-[#2A2521]/15 border border-[#3D352E]"
                 >
                   {currentRole === ROLES.CUSTOMER && <User className="w-3.5 h-3.5 text-emerald-400" />}
                   {currentRole === ROLES.RESTAURANT && <Store className="w-3.5 h-3.5 text-amber-400" />}

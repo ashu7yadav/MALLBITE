@@ -33,8 +33,8 @@ export const api = {
     return res.json();
   },
   detectTable: async (tableNumber, mallId) => {
-    const query = mallId ? `?mallId=${mallId}` : '';
-    const res = await fetch(`${API_BASE}/tables/detect/${tableNumber}${query}`);
+    const query = mallId ? `?mallId=${encodeURIComponent(mallId)}` : '';
+    const res = await fetch(`${API_BASE}/tables/detect/${encodeURIComponent(tableNumber)}${query}`);
     return res.json();
   },
   createTable: async (data) => {

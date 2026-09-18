@@ -4,13 +4,41 @@
 
 @layer base {
   body {
-    @apply bg-[#f8f9fb] text-slate-900 selection:bg-brand-500 selection:text-white font-sans;
+    @apply bg-[#FAF7F2] text-[#2D2620] selection:bg-[#F95721] selection:text-white;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
 
   h1, h2, h3, h4, .font-heading {
-    @apply font-display tracking-tight;
+    font-family: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+    letter-spacing: -0.02em;
   }
 }
+
+/* Warm Cream & Orange Theme Tokens */
+.bg-cream-canvas {
+  background-color: #FAF7F2;
+}
+
+.bg-cream-surface {
+  background-color: #F5EFE6;
+}
+
+.bg-cream-card {
+  background-color: #FFFFFF;
+}
+
+.border-cream-warm {
+  border-color: #EFE8DE;
+}
+
+.text-brand-orange {
+  color: #F95721;
+}
+
+.bg-brand-orange {
+  background-color: #F95721;
+}
+
 
 /* Custom scrollbars */
 .no-scrollbar::-webkit-scrollbar {

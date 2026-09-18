@@ -64,18 +64,55 @@ class DataStore {
   }
 
   getTableByNumber(tableNumber, mallId = "mall-city") {
-    const cleanNum = (tableNumber || "").toUpperCase().trim();
+    let raw = (tableNumber || "").toUpperCase().trim();
+    
+    // 1. If payload contains URL query parameters like ?table=A-12
+    if (raw.includes("TABLE=") || raw.includes("T=")) {
+      const match = raw.match(/[?&](?:table|t)=([^&#\s]+)/i);
+      if (match && match[1]) {
+        raw = decodeURIComponent(match[1]).toUpperCase().trim();
+      }
+    }
+
+    // 2. Direct match by qrCode field (e.g. MALLBITE-CITY-L3-A12)
+    const qrMatch = this.tables.find(t => 
+      t.qrCode && t.qrCode.toUpperCase() === raw && (!mallId || t.mallId === mallId || mallId === 'all')
+    );
+    if (qrMatch) return qrMatch;
+
+    const anyQrMatch = this.tables.find(t => t.qrCode && t.qrCode.toUpperCase() === raw);
+    if (anyQrMatch) return anyQrMatch;
+
+    // 3. If raw starts with MALLBITE- prefix, extract the table identifier
+    if (raw.startsWith("MALLBITE-")) {
+      const segments = raw.split("-");
+      // MALLBITE-[MALL]-[FLOOR]-[TABLE...] e.g. MALLBITE-CITY-L3-A12 or MALLBITE-PHX-L2-A-24
+      if (segments.length >= 4) {
+        raw = segments.slice(3).join("-");
+      }
+    }
+
+    // Normalization helper: remove non-alphanumeric characters for flexible matching (A12 vs A-12)
+    const norm = (str) => (str || "").replace(/[^A-Z0-9]/g, "");
+    const cleanNum = raw;
+
+    // 4. Exact number match within current mall
     const table = this.tables.find(t => 
-      t.number.toUpperCase() === cleanNum && (!mallId || t.mallId === mallId || mallId === 'all')
+      (t.number.toUpperCase() === cleanNum || norm(t.number) === norm(cleanNum)) &&
+      (!mallId || t.mallId === mallId || mallId === 'all')
     );
     if (table) return table;
 
-    const matchedByNum = this.tables.find(t => t.number.toUpperCase() === cleanNum);
+    // 5. Exact or normalized number match across all tables
+    const matchedByNum = this.tables.find(t => 
+      t.number.toUpperCase() === cleanNum || norm(t.number) === norm(cleanNum)
+    );
     if (matchedByNum) return matchedByNum;
 
+    // 6. Dynamic fallback table creation
     const mall = this.getMallById(mallId) || this.malls[0];
     return {
-      id: `table-custom-${cleanNum}`,
+      id: `table-custom-${cleanNum.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
       number: cleanNum || "A-12",
       mallId: mall ? mall.id : "mall-city",
       zone: "Zone A (North Food Atrium)",

@@ -19,7 +19,10 @@ import {
   Share2,
   DollarSign,
   ArrowRight,
-  ChevronRight
+  ChevronRight,
+  Copy,
+  ExternalLink,
+  Eye
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
@@ -27,7 +30,7 @@ import { api } from '../../services/api';
 import { useMall } from '../../context/MallContext';
 
 export const MallDashboard = () => {
-  const { allMalls, currentMall, switchMall, addNotification, refreshData } = useMall();
+  const { allMalls, currentMall, switchMall, switchTable, addNotification, refreshData } = useMall();
   const [analytics, setAnalytics] = useState(null);
   const [activeTab, setActiveTab] = useState('overview'); // overview | heatmap | qr | outlets | ai
   const [loading, setLoading] = useState(true);
@@ -481,6 +484,41 @@ export const MallDashboard = () => {
                     <span className="block font-black text-brand-600">3. TABLE DROP</span>
                     <span>Direct delivery</span>
                   </div>
+                </div>
+              </div>
+
+              {/* Standee QR Actions & Live Test */}
+              <div className="w-full max-w-sm mt-4 p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
+                <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                  <span>Encoded QR URL:</span>
+                  <span className="text-emerald-600 font-bold">Active & Scannable</span>
+                </div>
+                <div className="text-[11px] font-mono font-bold text-slate-700 bg-slate-50 p-2 rounded-xl border border-slate-200 truncate">
+                  {`${currentOrigin}/?mall=${currentMall.id}&table=${newTableNum}`}
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      switchTable(newTableNum, currentMall.id);
+                      addNotification("Simulated Scan Success", `Switched to Table ${newTableNum} at ${currentMall.name}`, "success");
+                    }}
+                    className="flex items-center justify-center gap-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 font-extrabold text-xs py-2 px-3 rounded-xl border border-brand-200 transition-all active:scale-95"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Test Table Scan</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${currentOrigin}/?mall=${currentMall.id}&table=${newTableNum}`);
+                      addNotification("URL Copied", "Direct table URL copied to clipboard", "info");
+                    }}
+                    className="flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2 px-3 rounded-xl border border-slate-200 transition-all active:scale-95"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy QR Link</span>
+                  </button>
                 </div>
               </div>
             </div>

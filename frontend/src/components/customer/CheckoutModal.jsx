@@ -12,8 +12,10 @@ import {
   Lock,
   ArrowRight,
   Store,
-  Loader2
+  Loader2,
+  Scan
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import confetti from 'canvas-confetti';
 import { useCart } from '../../context/CartContext';
 import { useMall } from '../../context/MallContext';
@@ -187,28 +189,67 @@ export const CheckoutModal = ({ onOrderSuccess }) => {
             </div>
 
             {/* UPI Sub-Options */}
+            {/* UPI Sub-Options with Live Dynamic Scannable QR Code */}
             {paymentMethod === 'upi' && (
-              <div className="mt-3 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
-                <div className="flex items-center justify-around gap-2">
-                  <button
-                    onClick={() => setUpiApp('gpay')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all ${upiApp === 'gpay' ? 'bg-white border-brand-500 text-brand-600 shadow-sm' : 'bg-transparent border-slate-200 text-slate-600'}`}
-                  >
-                    Google Pay
-                  </button>
-                  <button
-                    onClick={() => setUpiApp('phonepe')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all ${upiApp === 'phonepe' ? 'bg-white border-brand-500 text-brand-600 shadow-sm' : 'bg-transparent border-slate-200 text-slate-600'}`}
-                  >
-                    PhonePe
-                  </button>
-                  <button
-                    onClick={() => setUpiApp('paytm')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all ${upiApp === 'paytm' ? 'bg-white border-brand-500 text-brand-600 shadow-sm' : 'bg-transparent border-slate-200 text-slate-600'}`}
-                  >
-                    Paytm UPI
-                  </button>
+              <div className="mt-3 p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3.5">
+                
+                {/* Scannable Dynamic UPI QR Code */}
+                <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+                  <div className="p-2 bg-white rounded-xl border border-slate-200 shadow-sm shrink-0">
+                    <QRCodeSVG
+                      value={`upi://pay?pa=mallbite.pay@icici&pn=MALLBITE%20Food%20Court&am=${finalTotal}&cu=INR&tn=Table%20${currentTable.number}%20Order`}
+                      size={112}
+                      level="M"
+                      includeMargin={false}
+                    />
+                  </div>
+                  <div className="space-y-1 min-w-0 flex-1">
+                    <div className="flex items-center justify-center sm:justify-start gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md w-fit mx-auto sm:mx-0">
+                      <QrCode className="w-3 h-3" />
+                      <span>Scan & Pay via UPI</span>
+                    </div>
+                    <div className="text-xs font-black text-slate-900">
+                      ₹{finalTotal} <span className="text-[11px] font-medium text-slate-500">• Table {currentTable.number}</span>
+                    </div>
+                    <div className="text-[10px] text-slate-500 font-mono font-medium truncate">
+                      VPA: mallbite.pay@icici
+                    </div>
+                    <div className="text-[10px] text-slate-400 font-medium leading-tight">
+                      Scan with Google Pay, PhonePe, Paytm, CRED or any UPI app.
+                    </div>
+                  </div>
                 </div>
+
+                {/* Or Instant 1-Click Pay Buttons */}
+                <div>
+                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2 text-center">
+                    Or Select Direct App:
+                  </div>
+                  <div className="flex items-center justify-around gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setUpiApp('gpay')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all ${upiApp === 'gpay' ? 'bg-white border-brand-500 text-brand-600 shadow-sm ring-1 ring-brand-200' : 'bg-transparent border-slate-200 text-slate-600'}`}
+                    >
+                      Google Pay
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setUpiApp('phonepe')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all ${upiApp === 'phonepe' ? 'bg-white border-brand-500 text-brand-600 shadow-sm ring-1 ring-brand-200' : 'bg-transparent border-slate-200 text-slate-600'}`}
+                    >
+                      PhonePe
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setUpiApp('paytm')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all ${upiApp === 'paytm' ? 'bg-white border-brand-500 text-brand-600 shadow-sm ring-1 ring-brand-200' : 'bg-transparent border-slate-200 text-slate-600'}`}
+                    >
+                      Paytm UPI
+                    </button>
+                  </div>
+                </div>
+
                 <div className="text-[11px] text-slate-500 text-center font-medium">
                   Instant 1-Click Sandbox Authorization enabled for hackathon demo.
                 </div>

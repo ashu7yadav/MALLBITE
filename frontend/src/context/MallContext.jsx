@@ -51,22 +51,22 @@ const playChime = (type = 'success') => {
 export const MallProvider = ({ children }) => {
   const [allMalls, setAllMalls] = useState([]);
   
-  // Default to City Center Mall
+  // Default to Phoenix Mall Lucknow per prompt specification
   const [currentMall, setCurrentMall] = useState({
-    id: 'mall-city',
-    name: 'City Center Mall Food Court',
-    city: 'Metro City',
-    location: 'Level 3 Grand Food Atrium, City Center'
+    id: 'mall-phoenix-lko',
+    name: 'Phoenix Mall Lucknow',
+    city: 'Lucknow',
+    location: 'Level 2 Central Food Court, Sector B'
   });
 
   const [currentTable, setCurrentTable] = useState({
-    id: 'table-city-a12',
-    number: 'A-12',
-    mallId: 'mall-city',
-    zone: 'Zone A (North Food Atrium)',
-    floor: 'Level 3',
+    id: 'table-phx-lko-a17',
+    number: 'A17',
+    mallId: 'mall-phoenix-lko',
+    zone: 'Central Food Court',
+    floor: 'Floor 2',
     status: 'Active',
-    qrCode: 'MALLBITE-CITY-L3-A12'
+    qrCode: 'MALLBITE-PHOENIX-FLOOR2-TABLE-A17'
   });
 
   const [restaurants, setRestaurants] = useState([]);
@@ -75,15 +75,20 @@ export const MallProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+  const [outletQueues, setOutletQueues] = useState([]);
+  const [crowdData, setCrowdData] = useState(null);
+  const [inventorySignals, setInventorySignals] = useState([]);
 
   // Load initial data and malls
   const fetchData = useCallback(async () => {
     try {
-      const [mallsRes, restRes, catRes, ordersRes] = await Promise.all([
+      const [mallsRes, restRes, catRes, ordersRes, queueRes, crowdRes] = await Promise.all([
         api.getMalls(),
         api.getRestaurants(),
         api.getCategories(),
-        api.getOrders()
+        api.getOrders(),
+        api.getOutletQueues().catch(() => ({ success: false })),
+        api.getCrowdIntelligence().catch(() => ({ success: false }))
       ]);
       if (mallsRes.success && mallsRes.data.length > 0) {
         setAllMalls(mallsRes.data);
@@ -93,16 +98,36 @@ export const MallProvider = ({ children }) => {
       if (ordersRes.success && ordersRes.data.length > 0) {
         setActiveMasterOrder(ordersRes.data[0]);
       }
+      if (queueRes.success) setOutletQueues(queueRes.data);
+      if (crowdRes.success) setCrowdData(crowdRes.data);
     } catch (err) {
       console.warn("API connect error, using cached state", err);
     }
   }, []);
 
-  // Check URL parameters for live table QR code scans (e.g. ?table=A-12&mall=mall-city)
+  // Check URL path and query parameters for table QR scans (e.g. /mall/phoenix/floor-2/table-A17 or ?table=A17)
   useEffect(() => {
+    const path = window.location.pathname;
+    let urlMall = null;
+    let urlTable = null;
+    let urlFloor = null;
+
+    // Feature 1: /mall/phoenix/floor-2/table-A17
+    const pathMatch = path.match(/\/mall\/([^\/]+)\/floor-([^\/]+)\/table-([^\/\?#&]+)/i);
+    if (pathMatch) {
+      const mallSlug = pathMatch[1].toLowerCase();
+      urlFloor = `Floor ${pathMatch[2]}`;
+      urlTable = pathMatch[3].replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+      if (mallSlug.includes('phoenix') || mallSlug.includes('lko')) {
+        urlMall = 'mall-phoenix-lko';
+      } else if (mallSlug.includes('city')) {
+        urlMall = 'mall-city';
+      }
+    }
+
     const params = new URLSearchParams(window.location.search);
-    const tableParam = params.get('table') || params.get('t');
-    const mallParam = params.get('mall') || params.get('m');
+    const tableParam = urlTable || params.get('table') || params.get('t');
+    const mallParam = urlMall || params.get('mall') || params.get('m');
 
     fetchData().then(() => {
       if (mallParam) {
@@ -114,7 +139,7 @@ export const MallProvider = ({ children }) => {
       }
 
       if (tableParam) {
-        switchTable(tableParam, mallParam || 'mall-city');
+        switchTable(tableParam, mallParam || 'mall-phoenix-lko');
       }
     });
 
@@ -258,6 +283,10 @@ export const MallProvider = ({ children }) => {
         setIsQrScannerOpen,
         isDemoModalOpen,
         setIsDemoModalOpen,
+        outletQueues,
+        setOutletQueues,
+        crowdData,
+        inventorySignals,
         refreshData: fetchData,
         playChime
       }}

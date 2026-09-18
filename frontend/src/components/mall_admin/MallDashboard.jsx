@@ -229,94 +229,254 @@ export const MallDashboard = () => {
         </button>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-soft">
-          <span className="text-xs font-black text-slate-400 uppercase tracking-wider block">Total Food Court Orders</span>
-          <div className="text-2xl sm:text-3xl font-black font-display text-slate-950 mt-1">{kpis.totalOrders}</div>
-          <span className="text-[11px] font-bold text-emerald-600 mt-1 block">↑ 24.5% vs last week</span>
-        </div>
-
-        <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-soft">
-          <span className="text-xs font-black text-slate-400 uppercase tracking-wider block">Food Court GMV Revenue</span>
-          <div className="text-2xl sm:text-3xl font-black font-display text-slate-950 mt-1">{kpis.totalRevenue}</div>
-          <span className="text-[11px] font-bold text-brand-600 mt-1 block">8.5% Mall commission yield</span>
-        </div>
-
-        <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-soft">
-          <span className="text-xs font-black text-slate-400 uppercase tracking-wider block">Active Food Outlets</span>
-          <div className="text-2xl sm:text-3xl font-black font-display text-slate-950 mt-1">{kpis.activeRestaurants}</div>
-          <span className="text-[11px] font-bold text-blue-600 mt-1 block">100% on-premise uptime</span>
-        </div>
-
-        <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-soft">
-          <span className="text-xs font-black text-slate-400 uppercase tracking-wider block">Average Delivery SLA</span>
-          <div className="text-2xl sm:text-3xl font-black font-display text-slate-950 mt-1">{kpis.avgDeliveryTime}</div>
-          <span className="text-[11px] font-bold text-emerald-600 mt-1 block">Direct Table Drop Accuracy 99.8%</span>
-        </div>
-      </div>
-
-      {/* Tab: Overview & Hourly Chart */}
-      {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-slate-200/80 shadow-soft">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="font-black font-display text-base text-slate-950">Food Court Orders Per Hour</h3>
-                <p className="text-xs text-slate-500 font-medium">Telemetry across all connected restaurant counters</p>
-              </div>
-              <span className="text-xs font-black text-brand-600 bg-brand-50 px-3 py-1 rounded-full border border-brand-200/60">
-                Peak Rush: 7:30 PM – 9:30 PM
-              </span>
+      {/* B2B SaaS Header & Live Crowd Indicator (Features 8 & 9) */}
+      <div className="bg-[#2A2521] text-white rounded-3xl p-6 sm:p-7 border border-[#3E362F] shadow-soft space-y-4 text-left">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#F95721] text-white flex items-center justify-center font-black">
+              <Zap className="w-4 h-4" />
             </div>
-
-            <div className="h-64 sm:h-72 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={analytics.ordersPerHour}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="hour" stroke="#94a3b8" fontSize={11} />
-                  <YAxis stroke="#94a3b8" fontSize={11} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#0f172a', borderRadius: '16px', color: '#fff', border: 'none', fontSize: '12px' }}
-                  />
-                  <Bar dataKey="orders" fill="#fc8019" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+            <div>
+              <h2 className="text-xl font-black font-display text-white">MallBite Intelligence</h2>
+              <p className="text-xs text-[#A89F95]">Centralized real-time telemetry & operational operating system</p>
             </div>
           </div>
 
-          {/* Revenue Split Breakdown */}
-          <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-soft flex flex-col justify-between">
-            <div>
-              <h3 className="font-black font-display text-base text-slate-950 mb-1">Mall Commission Split</h3>
-              <p className="text-xs text-slate-500 font-medium mb-4">Automated payouts & food court billing</p>
-              
-              <div className="space-y-3">
-                <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">Mall Platform Fee (8.5%)</span>
-                    <span className="text-sm font-black text-slate-900">₹29,138</span>
-                  </div>
-                  <span className="bg-emerald-100 text-emerald-700 text-xs font-black px-2.5 py-1 rounded-xl">Settled</span>
-                </div>
+          <span className="self-start sm:self-auto bg-emerald-500/20 text-emerald-300 text-xs font-black px-3 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>AI Telemetry Active</span>
+          </span>
+        </div>
 
-                <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">Restaurant Outlets Share (91.5%)</span>
-                    <span className="text-sm font-black text-slate-900">₹3,13,662</span>
-                  </div>
-                  <span className="bg-blue-100 text-blue-700 text-xs font-black px-2.5 py-1 rounded-xl">Dispatched</span>
+        {/* Feature 9: Crowd Level Gauge */}
+        <div className="bg-black/30 rounded-2xl p-4 border border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="text-xs font-black uppercase tracking-wider text-[#C5BCB2]">
+              Live Food Court Crowd Level
+            </div>
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl font-black text-amber-400 font-display">78%</span>
+              <span className="bg-rose-500/20 text-rose-300 text-[10px] font-black uppercase px-2 py-0.5 rounded-md border border-rose-500/30">
+                Status: BUSY
+              </span>
+              <span className="text-xs text-slate-300">• Peak expected: <strong>7:00 PM – 8:30 PM</strong></span>
+            </div>
+          </div>
+
+          <div className="w-full md:w-64 space-y-1">
+            <div className="w-full bg-white/10 h-3 rounded-full overflow-hidden">
+              <div className="bg-gradient-to-r from-amber-400 to-[#F95721] h-full rounded-full" style={{ width: '78%' }} />
+            </div>
+            <div className="flex justify-between text-[10px] text-[#A89F95] font-bold">
+              <span>Low</span>
+              <span>Moderate</span>
+              <span className="text-amber-300 font-black">Busy (78%)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* KPI Cards (Feature 8) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-left">
+        <div className="bg-white rounded-3xl p-5 border border-[#EFE8DE] shadow-soft">
+          <span className="text-xs font-black text-[#8E857C] uppercase tracking-wider block">Today's Orders</span>
+          <div className="text-2xl sm:text-3xl font-black font-display text-[#2A2521] mt-1">1,248</div>
+          <span className="text-[11px] font-bold text-emerald-600 mt-1 block">↑ 18.2% vs yesterday</span>
+        </div>
+
+        <div className="bg-white rounded-3xl p-5 border border-[#EFE8DE] shadow-soft">
+          <span className="text-xs font-black text-[#8E857C] uppercase tracking-wider block">Active Customers</span>
+          <div className="text-2xl sm:text-3xl font-black font-display text-[#2A2521] mt-1">642</div>
+          <span className="text-[11px] font-bold text-blue-600 mt-1 block">Across 36 Food Court Tables</span>
+        </div>
+
+        <div className="bg-white rounded-3xl p-5 border border-[#EFE8DE] shadow-soft">
+          <span className="text-xs font-black text-[#8E857C] uppercase tracking-wider block">Food Court Revenue</span>
+          <div className="text-2xl sm:text-3xl font-black font-display text-[#2A2521] mt-1">₹2.84L</div>
+          <span className="text-[11px] font-bold text-[#F95721] mt-1 block">Avg Order: ₹437</span>
+        </div>
+
+        <div className="bg-white rounded-3xl p-5 border border-[#EFE8DE] shadow-soft">
+          <span className="text-xs font-black text-[#8E857C] uppercase tracking-wider block">Average Wait Time</span>
+          <div className="text-2xl sm:text-3xl font-black font-display text-[#2A2521] mt-1">11 min</div>
+          <span className="text-[11px] font-bold text-emerald-600 mt-1 block">Within 15m SLA target</span>
+        </div>
+      </div>
+
+      {/* Tab: Overview & Hourly Chart + Live Queues Table */}
+      {activeTab === 'overview' && (
+        <div className="space-y-6 text-left">
+          
+          {/* Live Outlet Queue Table (Feature 8) */}
+          <div className="bg-white rounded-3xl p-6 border border-[#EFE8DE] shadow-soft space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-black font-display text-base text-[#2A2521]">
+                  Live Food Court — Outlet Queues & Preparation Telemetry
+                </h3>
+                <p className="text-xs text-[#8E857C] font-medium">
+                  Real-time algorithmic wait estimation: <code>(Current Queue × Avg Prep) / Active Staff</code>
+                </p>
+              </div>
+              <span className="text-xs font-bold text-[#4E8752] bg-[#EEF6EF] px-3 py-1 rounded-full border border-[#D5EAD7]">
+                6 Connected Counters
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs text-left">
+                <thead>
+                  <tr className="border-b border-[#EFE8DE] text-[#8E857C] font-black uppercase text-[10px]">
+                    <th className="pb-3">Outlet Name</th>
+                    <th className="pb-3">Counter</th>
+                    <th className="pb-3">Active Orders</th>
+                    <th className="pb-3">Staff Active</th>
+                    <th className="pb-3">Estimated Wait</th>
+                    <th className="pb-3">Queue Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#FAF4EB]">
+                  {[
+                    { name: 'Pizza Hub', counter: 'FC-02', orders: 23, staff: 3, wait: '18 min', status: 'High', color: '#EF4444' },
+                    { name: 'South Kitchen', counter: 'FC-03', orders: 8, staff: 3, wait: '7 min', status: 'Low', color: '#10B981' },
+                    { name: 'Food Corner', counter: 'FC-04', orders: 14, staff: 3, wait: '9 min', status: 'Medium', color: '#F59E0B' },
+                    { name: 'Juice Bar', counter: 'FC-01', orders: 4, staff: 2, wait: '4 min', status: 'Low', color: '#10B981' },
+                    { name: 'Spice Route', counter: 'FC-05', orders: 11, staff: 4, wait: '14 min', status: 'Medium', color: '#F59E0B' },
+                    { name: 'Dessert Lab', counter: 'FC-06', orders: 5, staff: 2, wait: '7 min', status: 'Low', color: '#10B981' }
+                  ].map((outlet, idx) => (
+                    <tr key={idx} className="hover:bg-[#FAF7F2] font-semibold text-[#2A2521]">
+                      <td className="py-3 font-black text-[#2A2521] font-display">{outlet.name}</td>
+                      <td className="py-3 text-[#6F665D] font-mono">{outlet.counter}</td>
+                      <td className="py-3 font-bold">{outlet.orders} orders</td>
+                      <td className="py-3 text-[#6F665D]">{outlet.staff} staff</td>
+                      <td className="py-3 font-bold">{outlet.wait}</td>
+                      <td className="py-3">
+                        <span 
+                          className="px-2.5 py-0.5 rounded-full text-[10px] font-black"
+                          style={{ 
+                            backgroundColor: `${outlet.color}15`, 
+                            color: outlet.color, 
+                            border: `1px solid ${outlet.color}30` 
+                          }}
+                        >
+                          ● {outlet.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Feature 12: Lightweight Inventory Signals */}
+          <div className="bg-[#FFF8F2] rounded-3xl p-6 border border-[#F6DEC9] shadow-soft space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#F95721]" />
+                <h3 className="font-black font-display text-base text-[#2A2521]">
+                  Inventory Signals & Predictive Warnings
+                </h3>
+              </div>
+              <span className="text-[10px] bg-white px-2.5 py-0.5 rounded-md font-bold text-[#8E857C] border border-[#F6DEC9]">
+                Synced with Dinner Rush Forecast
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              <div className="bg-white p-3.5 rounded-2xl border border-[#F6DEC9]">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-black text-[#2A2521]">⚠️ Fresh Paneer</span>
+                  <span className="text-[10px] bg-rose-100 text-rose-700 font-black px-1.5 py-0.2 rounded">Low Stock</span>
                 </div>
+                <p className="text-[11px] text-[#6F665D]">
+                  Food Corner & Spice Route demand high. Estimated exhaustion in 45 mins.
+                </p>
+              </div>
+
+              <div className="bg-white p-3.5 rounded-2xl border border-[#F6DEC9]">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-black text-[#2A2521]">⚠️ Pizza Base Dough</span>
+                  <span className="text-[10px] bg-amber-100 text-amber-700 font-black px-1.5 py-0.2 rounded">Warning</span>
+                </div>
+                <p className="text-[11px] text-[#6F665D]">
+                  Expected to run low during 7:30 PM peak. Recommended: Pre-stretch 30 doughs.
+                </p>
+              </div>
+
+              <div className="bg-white p-3.5 rounded-2xl border border-[#D5EAD7]">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-black text-[#2A2521]">✓ Dosa Batter & Dairy</span>
+                  <span className="text-[10px] bg-emerald-100 text-emerald-700 font-black px-1.5 py-0.2 rounded">Healthy</span>
+                </div>
+                <p className="text-[11px] text-[#6F665D]">
+                  South Kitchen & Juice Bar buffers optimal for expected customer volume.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Orders Per Hour Chart */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-[#EFE8DE] shadow-soft">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-black font-display text-base text-[#2A2521]">Orders Per Hour</h3>
+                  <p className="text-xs text-[#8E857C] font-medium">Telemetry across all connected restaurant counters</p>
+                </div>
+                <span className="text-xs font-black text-[#F95721] bg-[#FFF2EB] px-3 py-1 rounded-full border border-[#F6DEC9]">
+                  Peak Rush: 7:00 PM – 8:30 PM
+                </span>
+              </div>
+
+              <div className="h-64 sm:h-72 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={analytics.ordersPerHour}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="hour" stroke="#94a3b8" fontSize={11} />
+                    <YAxis stroke="#94a3b8" fontSize={11} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#2a2521', borderRadius: '16px', color: '#fff', border: 'none', fontSize: '12px' }}
+                    />
+                    <Bar dataKey="orders" fill="#F95721" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
-            <button
-              onClick={() => addNotification("Export Report", "Financial settlement CSV downloaded.", "success")}
-              className="mt-6 w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs py-3 rounded-2xl transition-all"
-            >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-              <span>Export Daily Payout Settlement</span>
-            </button>
+            {/* Revenue Split Breakdown */}
+            <div className="bg-white rounded-3xl p-6 border border-[#EFE8DE] shadow-soft flex flex-col justify-between">
+              <div>
+                <h3 className="font-black font-display text-base text-[#2A2521] mb-1">Mall Commission Split</h3>
+                <p className="text-xs text-[#8E857C] font-medium mb-4">Automated payouts & food court billing</p>
+                
+                <div className="space-y-3">
+                  <div className="p-3.5 bg-[#FAF7F2] rounded-2xl border border-[#EFE8DE] flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] text-[#8E857C] font-black uppercase tracking-wider block">Mall Platform Fee (8.5%)</span>
+                      <span className="text-sm font-black text-[#2A2521]">₹24,140</span>
+                    </div>
+                    <span className="bg-emerald-100 text-emerald-700 text-xs font-black px-2.5 py-1 rounded-xl">Settled</span>
+                  </div>
+
+                  <div className="p-3.5 bg-[#FAF7F2] rounded-2xl border border-[#EFE8DE] flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] text-[#8E857C] font-black uppercase tracking-wider block">Restaurant Outlets Share (91.5%)</span>
+                      <span className="text-sm font-black text-[#2A2521]">₹2,59,860</span>
+                    </div>
+                    <span className="bg-blue-100 text-blue-700 text-xs font-black px-2.5 py-1 rounded-xl">Dispatched</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => addNotification("Export Report", "Financial settlement CSV downloaded.", "success")}
+                className="mt-6 w-full flex items-center justify-center gap-2 bg-[#2A2521] hover:bg-black text-white font-black text-xs py-3 rounded-2xl transition-all"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+                <span>Export Daily Payout Settlement</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

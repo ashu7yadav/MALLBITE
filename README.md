@@ -1,73 +1,89 @@
-# 🍔 MALLBITE — One QR. Every Food Outlet. One Seamless Experience.
+# 🍕 MallBite — AI-Powered Multi-Outlet Food Court Operating System
 
-> **Digital Food-Commerce Operating System for Shopping Mall Food Courts**
-
----
-
-## 🌟 Concept & Key Innovation
-**MALLBITE** transforms shopping mall food courts from fragmented, queue-heavy environments into a unified digital ecosystem. A customer sitting at **Table A-24** scans a single QR code, browses menus from multiple restaurants (Burger House, Pizza Corner, Coffee Culture, Spice Route, Wok Express, Dessert Lab), adds items from different outlets into **one single cart**, pays once, and gets everything delivered to their table via dedicated mall runners.
+> **One QR. Every Outlet. Intelligent Food Courts.**  
+> *From Food Ordering to Food-Court Intelligence.*
 
 ---
 
-## 🚀 Key Features
+## 🌟 Vision & Architecture
 
-1. **Swiggy/Zomato-Inspired Customer Experience**:
-   - Location & Table detection pill (`📍 Phoenix Mall Food Hub • Table A-24`).
-   - "What's on your mind?" circular dish carousel.
-   - Restaurant cards with discount badges (`70% OFF UPTO ₹140`, `₹135 OFF ABOVE ₹199`), star ratings, prep times, and food court counter numbers.
-   - Menu browser with category tabs, Veg/Non-Veg indicators, and quick quantity counters.
-2. **Multi-Restaurant Cart & Smart Splitting**:
-   - Add Classic Burger (Burger House) + Farmhouse Pizza (Pizza Corner) + Iced Cold Coffee (Coffee Culture) in one combined cart.
-   - Single combined payment checkout (Mock UPI with QR, Credit/Debit Card, Net Banking).
-   - Generates **Master Order #MB10245** split into separate kitchen sub-orders (**#B782**, **#P491**, **#C221**).
-3. **Real-Time Live Order Tracking**:
-   - Synchronized timeline from Kitchen Cooking → Ready at Counters → Runner Pickup → Table Delivered.
-4. **4 Synchronized Role Dashboards**:
-   - **Customer**: Mobile-optimized ordering hub, multi-cart, live tracker & AI smart search.
-   - **Restaurant Kitchen Admin**: Live order pipeline (Incoming → Preparing → Ready) & stock availability manager.
-   - **Mall Admin**: Food court floor Heatmap, dynamic Table QR Generator & AI Peak Demand Forecaster.
-   - **Delivery Runner**: Multi-counter pickup checklist & table delivery status progression.
-5. **Hackathon Live Demo Mode**:
-   - 1-click interactive demo simulator for judges to test the complete 5-stage flow in 15 seconds.
+**MallBite** transforms shopping mall food courts into an intelligent, synchronized digital operating system connecting customers, restaurant kitchens, delivery staff, and mall administrators through a unified QR-driven infrastructure.
+
+```
++-----------------------------------------------------------------------------------+
+|                        MALLBITE OPERATING SYSTEM PIPELINE                         |
++-----------------------------------------------------------------------------------+
+| 1. Physical Table QR    -> Encodes Mall ID, Floor & Table Number (e.g. Table A17) |
+| 2. Customer Hub         -> One Combined Smart Cart across multiple food outlets   |
+| 3. AI Advisor Engine    -> Multi-attribute recommendation (Budget, Mood, Time)    |
+| 4. Smart Queue Engine   -> Live queue telemetry: Wait = ((Q * Prep) / Staff) * C  |
+| 5. Unified Payment      -> Single checkout generates Master Order #MB1042        |
+| 6. Kitchen Dispatch     -> Autonomous routing to Food Corner, South Kitchen, etc. |
+| 7. Smart Batching       -> Synchronized max(prep_time) pickup window + runner path |
+| 8. Telemetry & BI       -> Live crowd gauge, demand curves & predictive inventory |
++-----------------------------------------------------------------------------------+
+```
+
+---
+
+## 🚀 Key Hackathon Capabilities
+
+### 1. Multi-Outlet Smart Cart & Master Order Splitting
+- Combine dishes from **Pizza Hub**, **South Kitchen**, **Food Corner**, **Juice Bar**, and **Spice Route** in a single cart.
+- Single payment checkout generating unified master order (e.g., **#MB1042**) split into individual kitchen tickets (**#P101**, **#S202**, **#F303**).
+
+### 2. Multi-Attribute AI Food Recommendation Engine
+- Modular multi-attribute scoring model:
+  $$\text{Score} = w_b \cdot \text{BudgetMatch} + w_c \cdot \text{CuisineMatch} + w_d \cdot \text{DietaryMatch} + w_p \cdot \text{PreferenceMatch} + w_t \cdot \text{PrepTimeMatch} + w_r \cdot \text{Rating}$$
+- Transparent match percentages and personalized explanations (*"Fits budget (< ₹300) • Ready in 8 mins"*).
+
+### 3. Smart Queue Wait-Time Algorithm & Alternative Suggestions
+- Algorithmic formula:
+  $$\text{Estimated Wait} = \frac{\text{Active Queue Orders} \times \text{Average Prep Time}}{\text{Active Kitchen Staff}} \times \text{Complexity Factor}$$
+- Proactive **Smart Alternative Modal** alerts customers if an outlet exceeds wait limits and suggests faster dishes from neighboring counters.
+
+### 4. Smart Multi-Outlet Order Batching Algorithm
+- Runner route optimization through food court counters (e.g., `Juice Bar (FC-01) ➔ Pizza Hub (FC-02) ➔ South Kitchen (FC-03)`).
+- Synchronized pickup window based on $\max(t_{\text{prep}})$ to deliver piping-hot food simultaneously.
+
+### 5. Multi-Outlet Side-by-Side Dish Comparison
+- Interactive modal comparing portion sizes, prices, ratings, dietary profiles, and preparation times across competing food court outlets.
+
+### 6. B2B Mall Admin Telemetry & Crowd Intelligence
+- Real-time food court crowd level gauge (e.g., `78% BUSY`).
+- Hourly demand curves predicting upcoming rush windows (`7:00 PM – 8:30 PM`).
+- Predictive inventory signals warning kitchens of low stock before peak dinner rushes.
+
+### 7. 4 Synchronized Role Dashboards
+- **Customer Hub**: Table-aware ordering, AI advisor, wait filters, live multi-outlet tracking.
+- **Kitchen Dashboard**: Real-time counter ticket progression (Incoming ➔ Preparing ➔ Ready).
+- **Delivery Runner Hub**: Multi-counter pickup routing checklist and table drop-off confirmation.
+- **Mall Admin Portal**: Live counter queues, crowd intelligence, daily revenue settlements, and printable table QR standee generator.
 
 ---
 
 ## 💻 Tech Stack
-- **Frontend**: React 18, Vite, Tailwind CSS, Lucide Icons, Recharts, Canvas-Confetti, QRCode.
-- **Backend**: Node.js, Express, REST APIs, JSON state persistence with live polling sync.
-
----
-
-## 🚀 Deployment
-
-MALLBITE is pre-configured for **1-click deployment** on multiple platforms. For full details, see the **[Deployment Guide](DEPLOYMENT.md)**.
-
-### Quick Deploy:
-- **Vercel (Serverless Fullstack)**: Import repo to [Vercel](https://vercel.com/new) and click Deploy. Pre-configured with `vercel.json` and `/api` serverless handler.
-- **Render (Fullstack Service)**: Connect repository on [Render](https://render.com) using `npm run build` and `npm start`.
-- **Docker**: Run `docker build -t mallbite .` and `docker run -p 5000:5000 mallbite`.
+- **Frontend**: React 18, Vite, Vanilla CSS + Tailwind utility tokens, Lucide Icons, Recharts, Canvas-Confetti, QRCode.
+- **Backend**: Node.js, Express, REST APIs, JSON state persistence, modular AI Engine.
 
 ---
 
 ## 🛠️ Running Locally
 
-### Development Mode:
-
+### Development:
 ```bash
-# 1. Install all dependencies
+# 1. Install dependencies
 npm run install:all
 
-# 2. Start Backend Server (runs on http://localhost:5000)
+# 2. Start Backend API Server (http://localhost:5000)
 npm run dev:backend
 
-# 3. In another terminal, start Frontend App (runs on http://localhost:3000)
+# 3. Start Frontend App (http://localhost:3000)
 npm run dev:frontend
 ```
 
-### Production Mode Test:
-
+### Production Build & Verification:
 ```bash
-# Build & start unified fullstack app on http://localhost:5000
 npm run build
 npm start
 ```

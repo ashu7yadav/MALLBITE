@@ -8,6 +8,7 @@ import {
   initialHeatmap,
   initialOrders
 } from "./initialData.js";
+import { AIEngine } from "../ai/aiEngine.js";
 
 class DataStore {
   constructor() {
@@ -20,12 +21,28 @@ class DataStore {
     this.heatmap = [...initialHeatmap];
     this.orders = [...initialOrders];
     this.deliveryStaff = [
-      { id: "runner-1", name: "Rohan Verma", phone: "+91 98765 11223", activeTasks: 1, status: "Available", zone: "North Food Court" },
-      { id: "runner-2", name: "Amit Kumar", phone: "+91 98765 22334", activeTasks: 0, status: "Available", zone: "South Atrium" },
-      { id: "runner-3", name: "Pooja Singh", phone: "+91 98765 33445", activeTasks: 0, status: "Available", zone: "Sky Terrace" }
+      { id: "runner-1", name: "Rohan Verma", phone: "+91 98765 11223", activeTasks: 1, status: "Available", zone: "Central Food Court" },
+      { id: "runner-2", name: "Amit Kumar", phone: "+91 98765 22334", activeTasks: 0, status: "Available", zone: "East Dining Gallery" },
+      { id: "runner-3", name: "Pooja Singh", phone: "+91 98765 33445", activeTasks: 0, status: "Available", zone: "Sky Atrium Terrace" }
     ];
-    this.deliveryTasks = [];
-    this.orderCounter = 10245;
+    this.deliveryTasks = [
+      {
+        id: "task-MB1042",
+        masterOrderId: "MB1042",
+        tableNumber: "A17",
+        customerName: "Aarav Sharma",
+        customerPhone: "+91 98765 43210",
+        runnerName: "Rohan Verma",
+        status: "Assigned",
+        pickups: [
+          { subOrderId: "P-402", restaurantName: "Pizza Hub", counterNumber: "FC-02", isReady: false, isPicked: false },
+          { subOrderId: "S-108", restaurantName: "South Kitchen", counterNumber: "FC-03", isReady: false, isPicked: false },
+          { subOrderId: "J-305", restaurantName: "Juice Bar", counterNumber: "FC-01", isReady: true, isPicked: false }
+        ],
+        createdAt: new Date().toISOString()
+      }
+    ];
+    this.orderCounter = 1042;
   }
 
   // --- Malls & Tables ---
@@ -34,7 +51,13 @@ class DataStore {
   }
 
   getMallById(id) {
-    return this.malls.find(m => m.id === id || m.id.toLowerCase() === (id || "").toLowerCase());
+    if (!id) return this.malls[0];
+    const clean = id.toLowerCase().trim();
+    return this.malls.find(m => 
+      m.id.toLowerCase() === clean || 
+      m.name.toLowerCase().includes(clean) ||
+      clean.includes(m.id.toLowerCase())
+    ) || this.malls[0];
   }
 
   createMall(data) {
@@ -45,28 +68,50 @@ class DataStore {
       city: data.city || "City Center",
       location: data.location || "Central Food Atrium",
       zones: data.zones || [
-        { id: "zone-1", name: "North Food Court", tables: ["A-01", "A-02", "A-05", "A-10"] },
-        { id: "zone-2", name: "Central Dining", tables: ["B-01", "B-05", "B-10"] }
+        { id: "zone-1", name: "Central Food Court", tables: ["A-17", "A-12", "A-01", "A-05"] },
+        { id: "zone-2", name: "East Dining Gallery", tables: ["B-05", "B-12"] }
       ],
-      totalTables: data.totalTables || 20,
+      totalTables: data.totalTables || 30,
       activeOutlets: data.activeOutlets || 6,
-      dailyVisitors: data.dailyVisitors || 5000
+      dailyVisitors: data.dailyVisitors || 10000
     };
     this.malls.unshift(newMall);
     return newMall;
   }
 
   getTables(mallId) {
-    if (mallId) {
+    if (mallId && mallId !== 'all') {
       return this.tables.filter(t => t.mallId === mallId);
     }
     return this.tables;
   }
 
-  getTableByNumber(tableNumber, mallId = "mall-city") {
+  /**
+   * FEATURE 1: Smart Table QR Detection
+   * Supports URLs like /mall/phoenix/floor-2/table-A17
+   * Supports standard query params ?table=A17&mall=phoenix-lko
+   */
+  getTableByNumber(tableNumber, mallId = "mall-phoenix-lko") {
     let raw = (tableNumber || "").toUpperCase().trim();
-    
-    // 1. If payload contains URL query parameters like ?table=A-12
+    let detectedFloor = null;
+    let detectedMall = mallId;
+
+    // Pattern A: Path format /mall/phoenix/floor-2/table-A17
+    if (raw.includes("/MALL/") || raw.includes("FLOOR-") || raw.includes("TABLE-") || raw.includes("TABLE/")) {
+      const match = raw.match(/MALL\/([^\/]+)\/FLOOR-([^\/]+)\/TABLE-?([^\/\?#&]+)/i);
+      if (match) {
+        const mallSlug = match[1].toLowerCase();
+        detectedFloor = `Floor ${match[2]}`;
+        raw = match[3].replace(/[^A-Z0-9]/gi, '').toUpperCase();
+        if (mallSlug.includes("phoenix") || mallSlug.includes("lko")) {
+          detectedMall = "mall-phoenix-lko";
+        } else if (mallSlug.includes("city")) {
+          detectedMall = "mall-city";
+        }
+      }
+    }
+
+    // Pattern B: Query parameters ?table=A17&mall=mall-phoenix-lko
     if (raw.includes("TABLE=") || raw.includes("T=")) {
       const match = raw.match(/[?&](?:table|t)=([^&#\s]+)/i);
       if (match && match[1]) {
@@ -74,51 +119,31 @@ class DataStore {
       }
     }
 
-    // 2. Direct match by qrCode field (e.g. MALLBITE-CITY-L3-A12)
-    const qrMatch = this.tables.find(t => 
-      t.qrCode && t.qrCode.toUpperCase() === raw && (!mallId || t.mallId === mallId || mallId === 'all')
-    );
-    if (qrMatch) return qrMatch;
+    // Normalization helper
+    const norm = (str) => (str || "").replace(/[^A-Z0-9]/gi, "").toUpperCase();
+    const cleanNum = norm(raw);
 
-    const anyQrMatch = this.tables.find(t => t.qrCode && t.qrCode.toUpperCase() === raw);
-    if (anyQrMatch) return anyQrMatch;
-
-    // 3. If raw starts with MALLBITE- prefix, extract the table identifier
-    if (raw.startsWith("MALLBITE-")) {
-      const segments = raw.split("-");
-      // MALLBITE-[MALL]-[FLOOR]-[TABLE...] e.g. MALLBITE-CITY-L3-A12 or MALLBITE-PHX-L2-A-24
-      if (segments.length >= 4) {
-        raw = segments.slice(3).join("-");
-      }
-    }
-
-    // Normalization helper: remove non-alphanumeric characters for flexible matching (A12 vs A-12)
-    const norm = (str) => (str || "").replace(/[^A-Z0-9]/g, "");
-    const cleanNum = raw;
-
-    // 4. Exact number match within current mall
+    // 1. Exact match within current mall
     const table = this.tables.find(t => 
-      (t.number.toUpperCase() === cleanNum || norm(t.number) === norm(cleanNum)) &&
-      (!mallId || t.mallId === mallId || mallId === 'all')
+      norm(t.number) === cleanNum && (!detectedMall || t.mallId === detectedMall || detectedMall === 'all')
     );
     if (table) return table;
 
-    // 5. Exact or normalized number match across all tables
-    const matchedByNum = this.tables.find(t => 
-      t.number.toUpperCase() === cleanNum || norm(t.number) === norm(cleanNum)
-    );
-    if (matchedByNum) return matchedByNum;
+    // 2. Exact match across all tables
+    const matchedAcross = this.tables.find(t => norm(t.number) === cleanNum);
+    if (matchedAcross) return matchedAcross;
 
-    // 6. Dynamic fallback table creation
-    const mall = this.getMallById(mallId) || this.malls[0];
+    // 3. Fallback table object
+    const targetMallObj = this.getMallById(detectedMall) || this.malls[0];
     return {
-      id: `table-custom-${cleanNum.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
-      number: cleanNum || "A-12",
-      mallId: mall ? mall.id : "mall-city",
-      zone: "Zone A (North Food Atrium)",
-      floor: "Level 3",
+      id: `table-${targetMallObj.id}-${cleanNum.toLowerCase()}`,
+      number: cleanNum || "A17",
+      mallId: targetMallObj.id,
+      mallName: targetMallObj.name,
+      zone: "Central Food Court",
+      floor: detectedFloor || "Floor 2",
       status: "Active",
-      qrCode: `MALLBITE-${(mall ? mall.id : 'CITY').toUpperCase()}-L3-${cleanNum || "A12"}`
+      qrCode: `MALLBITE-${targetMallObj.id.toUpperCase()}-${cleanNum || "A17"}`
     };
   }
 
@@ -127,17 +152,17 @@ class DataStore {
     const newTable = {
       id,
       number: data.number.toUpperCase(),
-      mallId: data.mallId || "mall-city",
-      zone: data.zone || "North Food Atrium",
-      floor: data.floor || "Level 3",
+      mallId: data.mallId || "mall-phoenix-lko",
+      zone: data.zone || "Central Food Court",
+      floor: data.floor || "Floor 2",
       status: "Active",
-      qrCode: `MALLBITE-${(data.mallId || 'CITY').toUpperCase()}-${data.floor ? data.floor.replace(/\s+/g, '') : 'L3'}-${data.number.toUpperCase()}`
+      qrCode: `MALLBITE-${(data.mallId || 'PHX').toUpperCase()}-${data.number.toUpperCase()}`
     };
     this.tables.push(newTable);
     return newTable;
   }
 
-  bulkCreateTables(tableList, mallId = "mall-city", zone = "Zone A", floor = "Level 3") {
+  bulkCreateTables(tableList, mallId = "mall-phoenix-lko", zone = "Central Food Court", floor = "Floor 2") {
     const created = [];
     for (const num of tableList) {
       const cleanNum = num.toUpperCase().trim();
@@ -150,7 +175,7 @@ class DataStore {
           zone,
           floor,
           status: "Active",
-          qrCode: `MALLBITE-${mallId.toUpperCase()}-${floor.replace(/\s+/g, '')}-${cleanNum}`
+          qrCode: `MALLBITE-${mallId.toUpperCase()}-${cleanNum}`
         };
         this.tables.push(newTable);
         created.push(newTable);
@@ -182,9 +207,12 @@ class DataStore {
       rating: 4.8,
       reviewsCount: 1,
       prepTime: data.prepTime || "10-15 mins",
+      avgPrepMinutes: 12,
+      activeStaff: 3,
+      currentQueueOrders: 4,
       priceForTwo: data.priceForTwo || "₹350",
-      counterNumber: data.counterNumber || `FC-${this.restaurants.length + 1}`,
-      floor: data.floor || "Level 3 Food Court",
+      counterNumber: data.counterNumber || `FC-0${this.restaurants.length + 1}`,
+      floor: data.floor || "Level 2 Food Court",
       isVegOnly: !!data.isVegOnly,
       offerTag: data.offerTag || "10% OFF ON ORDERS ABOVE ₹199",
       bannerImage: data.bannerImage || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
@@ -206,7 +234,6 @@ class DataStore {
     return null;
   }
 
-
   // --- Menu Items ---
   getMenuItems(filters = {}) {
     let items = [...this.menuItems];
@@ -215,11 +242,18 @@ class DataStore {
     }
     if (filters.category) {
       const catLower = filters.category.toLowerCase();
-      items = items.filter(i => i.category.toLowerCase().includes(catLower) || (i.name.toLowerCase().includes(catLower)));
+      items = items.filter(i => 
+        i.category.toLowerCase().includes(catLower) || 
+        i.name.toLowerCase().includes(catLower)
+      );
     }
     if (filters.isVeg !== undefined && filters.isVeg !== null && filters.isVeg !== "") {
       const isVegBool = String(filters.isVeg) === "true";
       items = items.filter(i => i.isVeg === isVegBool);
+    }
+    if (filters.maxWait) {
+      const max = parseInt(filters.maxWait, 10);
+      items = items.filter(i => (i.prepTimeNum || 12) <= max);
     }
     if (filters.search) {
       const q = filters.search.toLowerCase();
@@ -248,6 +282,7 @@ class DataStore {
       id,
       ...itemData,
       price: Number(itemData.price) || 99,
+      prepTimeNum: Number(itemData.prepTimeNum) || 10,
       isVeg: Boolean(itemData.isVeg),
       isAvailable: true,
       rating: 4.5,
@@ -287,14 +322,15 @@ class DataStore {
     };
   }
 
-  // --- Multi-Restaurant Order Splitting ---
+  // --- FEATURE 3 & 15: Multi-Outlet Smart Orders with Unified MB1042 ID ---
   createMasterOrder({
-    tableNumber = "A-24",
-    customerName = "Guest Customer",
+    tableNumber = "A17",
+    customerName = "Aarav Sharma",
     customerPhone = "+91 98765 43210",
     items = [],
     paymentMethod = "UPI",
-    couponCode = null
+    couponCode = null,
+    mallId = "mall-phoenix-lko"
   }) {
     this.orderCounter += 1;
     const masterOrderId = `MB${this.orderCounter}`;
@@ -302,11 +338,11 @@ class DataStore {
     // Group cart items by restaurant
     const restaurantGroups = {};
     items.forEach(cartItem => {
-      const restId = cartItem.restaurantId;
+      const restId = cartItem.restaurantId || 'rest-other';
       if (!restaurantGroups[restId]) {
         restaurantGroups[restId] = {
           restaurantId: restId,
-          restaurantName: cartItem.restaurantName,
+          restaurantName: cartItem.restaurantName || "Food Court Kitchen",
           items: []
         };
       }
@@ -325,7 +361,6 @@ class DataStore {
       subtotal += it.price * it.quantity;
     });
 
-    // Check discount
     let discount = 0;
     if (couponCode) {
       const couponRes = this.validateCoupon(couponCode, subtotal);
@@ -342,13 +377,13 @@ class DataStore {
     const subOrders = Object.values(restaurantGroups).map((group, index) => {
       const rest = this.getRestaurantById(group.restaurantId);
       const prefix = rest ? rest.name.charAt(0).toUpperCase() : 'S';
-      const subId = `${prefix}${Math.floor(100 + Math.random() * 900)}`;
-      
-      // Update restaurant revenue
+      const subId = `${prefix}-${Math.floor(100 + Math.random() * 900)}`;
+
       if (rest) {
         rest.todayOrders += 1;
         const restSum = group.items.reduce((acc, cur) => acc + (cur.price * cur.quantity), 0);
         rest.todayRevenue += restSum;
+        rest.currentQueueOrders = (rest.currentQueueOrders || 4) + 1;
       }
 
       return {
@@ -357,26 +392,29 @@ class DataStore {
         restaurantId: group.restaurantId,
         restaurantName: group.restaurantName,
         counterNumber: rest ? rest.counterNumber : `FC-0${index + 1}`,
-        status: "Accepted", // Instant auto-accept
+        status: "Accepted",
         statusTimeline: [
-          { status: "Order Placed", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), done: true },
+          { status: "Order Received", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), done: true },
           { status: "Accepted", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), done: true },
           { status: "Preparing", time: null, done: false },
           { status: "Ready for Pickup", time: null, done: false }
         ],
         items: group.items,
-        estimatedTime: "12-15 mins"
+        estimatedTime: rest ? rest.prepTime : "10-14 mins"
       };
     });
 
-    // Assign a delivery runner
+    // Calculate smart batch parameters for this multi-outlet order
+    const smartBatch = AIEngine.calculateSmartBatch(subOrders, this.restaurants);
+
     const assignedRunner = this.deliveryStaff[0];
+    const mallObj = this.getMallById(mallId);
 
     const masterOrder = {
       id: masterOrderId,
-      tableNumber,
-      tableName: `Table ${tableNumber} (North Court)`,
-      mallName: "Phoenix Marketcity Food Hub",
+      tableNumber: tableNumber || "A17",
+      tableName: `Table ${tableNumber || "A17"} (Central Food Court)`,
+      mallName: mallObj ? mallObj.name : "Phoenix Mall Lucknow",
       customerName,
       customerPhone,
       subtotal,
@@ -384,20 +422,21 @@ class DataStore {
       gstTaxes,
       discount,
       totalAmount,
-      paymentStatus: "Paid (Verified)",
+      paymentStatus: "Paid (UPI Verified)",
       paymentMethod,
       orderStatus: "Preparing",
       createdAt: new Date().toISOString(),
-      estimatedDeliveryTime: "15-18 mins",
+      estimatedDeliveryTime: `${smartBatch ? smartBatch.estimatedDeliveryMinutes : 12} mins`,
       deliveryStaff: `${assignedRunner.name} (Runner #1)`,
       deliveryStaffPhone: assignedRunner.phone,
-      deliveryStatus: "Assigned", // Assigned -> Picked Up -> On The Way -> Delivered
-      subOrders
+      deliveryStatus: "Assigned",
+      subOrders,
+      smartBatch
     };
 
     this.orders.unshift(masterOrder);
 
-    // Create delivery task
+    // Create delivery runner task
     const deliveryTask = {
       id: `task-${masterOrderId}`,
       masterOrderId,
@@ -406,6 +445,7 @@ class DataStore {
       customerPhone,
       runnerName: assignedRunner.name,
       status: "Assigned",
+      batchId: smartBatch ? smartBatch.batchId : `B${Math.floor(100 + Math.random() * 900)}`,
       pickups: subOrders.map(so => ({
         subOrderId: so.id,
         restaurantName: so.restaurantName,
@@ -428,7 +468,6 @@ class DataStore {
     return this.orders.find(o => o.id === id);
   }
 
-  // Update a sub-order from Restaurant Kitchen
   updateSubOrderStatus(subOrderId, newStatus) {
     for (const master of this.orders) {
       const sub = master.subOrders.find(s => s.id === subOrderId);
@@ -444,7 +483,6 @@ class DataStore {
           const readyStep = sub.statusTimeline.find(t => t.status === "Ready for Pickup");
           if (readyStep) { readyStep.done = true; readyStep.time = nowTime; }
 
-          // Update delivery task item readiness
           const delTask = this.deliveryTasks.find(dt => dt.masterOrderId === master.id);
           if (delTask) {
             const p = delTask.pickups.find(pick => pick.subOrderId === subOrderId);
@@ -452,8 +490,9 @@ class DataStore {
           }
         }
 
-        // Check if all suborders are ready
-        const allReady = master.subOrders.every(s => s.status === "Ready for Pickup" || s.status === "Picked Up" || s.status === "Delivered");
+        const allReady = master.subOrders.every(s => 
+          s.status === "Ready for Pickup" || s.status === "Picked Up" || s.status === "Delivered"
+        );
         if (allReady && master.orderStatus === "Preparing") {
           master.orderStatus = "Ready for Table Pickup";
         }
@@ -464,7 +503,6 @@ class DataStore {
     return null;
   }
 
-  // Delivery task status update
   updateDeliveryTaskStatus(taskId, status) {
     const task = this.deliveryTasks.find(t => t.id === taskId);
     if (!task) return null;
@@ -491,103 +529,89 @@ class DataStore {
     return this.deliveryTasks;
   }
 
-  // Mall Analytics & Heatmap
+  // --- AI INTELLIGENCE METHODS ---
+
+  getAIRecommendations(preferences = {}) {
+    return AIEngine.getRecommendations(this.menuItems, this.restaurants, preferences);
+  }
+
+  getOutletQueues() {
+    return this.restaurants.map(rest => {
+      const activeCount = rest.currentQueueOrders || 5;
+      return AIEngine.calculateOutletQueue(rest, activeCount);
+    });
+  }
+
+  getFasterAlternatives(itemId, maxWait = 15) {
+    const item = this.menuItems.find(i => i.id === itemId) || this.menuItems[0];
+    return AIEngine.getFasterAlternatives(item, this.menuItems, this.restaurants, maxWait);
+  }
+
+  getSmartBatch(orderId) {
+    const order = this.getMasterOrderById(orderId) || this.orders[0];
+    if (!order) return null;
+    return AIEngine.calculateSmartBatch(order.subOrders, this.restaurants);
+  }
+
+  getCrowdAndDemandForecast() {
+    return AIEngine.getCrowdAndDemandForecast(this.orders, this.restaurants);
+  }
+
+  getInventorySignals() {
+    return AIEngine.getInventorySignals(this.restaurants);
+  }
+
   getMallAnalytics() {
-    const totalRevenue = this.restaurants.reduce((acc, r) => acc + r.todayRevenue, 0) + 185400;
-    const totalOrders = this.restaurants.reduce((acc, r) => acc + r.todayOrders, 0) + 940;
+    const totalRevenue = this.restaurants.reduce((acc, r) => acc + r.todayRevenue, 0) + 210000;
+    const totalOrders = this.restaurants.reduce((acc, r) => acc + r.todayOrders, 0) + 1240;
 
     return {
       kpis: {
         totalOrders,
         totalRevenue: `₹${(totalRevenue).toLocaleString('en-IN')}`,
         activeRestaurants: this.restaurants.filter(r => r.status === "Open").length,
-        todayCustomers: 8420,
-        averageOrderValue: "₹480",
-        cancellationRate: "0.4%",
-        avgDeliveryTime: "14.2 mins"
+        todayCustomers: 8940,
+        averageOrderValue: "₹437",
+        averageWaitTime: "11 min",
+        avgDeliveryTime: "11.4 mins"
       },
       ordersPerHour: [
-        { hour: "11 AM", orders: 28, revenue: 12400 },
         { hour: "12 PM", orders: 94, revenue: 41200 },
         { hour: "01 PM", orders: 148, revenue: 68900 },
         { hour: "02 PM", orders: 112, revenue: 51200 },
-        { hour: "03 PM", orders: 45, revenue: 19800 },
-        { hour: "04 PM", orders: 38, revenue: 16500 },
-        { hour: "05 PM", orders: 62, revenue: 27800 },
-        { hour: "06 PM", orders: 88, revenue: 39400 },
-        { hour: "07 PM", orders: 165, revenue: 76500 },
-        { hour: "08 PM", orders: 192, revenue: 88900 },
-        { hour: "09 PM", orders: 135, revenue: 62400 }
+        { hour: "04 PM", orders: 48, revenue: 18500 },
+        { hour: "05 PM", orders: 72, revenue: 29800 },
+        { hour: "06 PM", orders: 115, revenue: 48400 },
+        { hour: "07 PM", orders: 184, revenue: 84500 },
+        { hour: "08 PM", orders: 210, revenue: 96800 },
+        { hour: "09 PM", orders: 145, revenue: 64200 }
       ],
       popularCategories: [
-        { name: "Burgers", percentage: 32 },
-        { name: "Pizzas", percentage: 28 },
-        { name: "Biryani & North Indian", percentage: 22 },
-        { name: "Beverages & Coffee", percentage: 10 },
-        { name: "Desserts", percentage: 8 }
+        { name: "Pizzas & Breads", percentage: 32 },
+        { name: "South Indian Dosas", percentage: 28 },
+        { name: "Burgers & Wraps", percentage: 22 },
+        { name: "Beverages & Shakes", percentage: 12 },
+        { name: "Biryani & Thalis", percentage: 6 }
       ],
-      heatmap: this.heatmap,
-      aiDemandForecast: {
-        peakWindow: "7:00 PM – 9:30 PM",
-        expectedOrders: "350+ orders",
-        highDemandZones: ["North Food Court (A-Tables)", "Sky Terrace (C-Tables)"],
-        recommendedStaffIncrease: 3,
-        suggestedOutletsPrep: ["Burger House (Prepare +40 patties)", "Pizza Corner (Pre-stretch 30 doughs)"]
-      }
+      crowdIntelligence: this.getCrowdAndDemandForecast(),
+      inventorySignals: this.getInventorySignals(),
+      outletQueues: this.getOutletQueues(),
+      heatmap: this.heatmap
     };
   }
 
-  // AI Recommendation engine
-  getAIRecommendations(cartItems = []) {
-    const hasBurger = cartItems.some(i => i.name.toLowerCase().includes("burger"));
-    const hasPizza = cartItems.some(i => i.name.toLowerCase().includes("pizza"));
-    const hasBiryani = cartItems.some(i => i.name.toLowerCase().includes("biryani"));
-
-    const suggestions = [];
-    if (hasBurger || hasPizza) {
-      suggestions.push({
-        id: "rec-1",
-        title: "Cold Coffee & Fries Combo Saver",
-        reason: "86% of customers pairing Burgers & Pizza add Cold Coffee & Crinkle Fries",
-        suggestedItems: [
-          this.menuItems.find(i => i.id === "item-102"), // Peri peri fries
-          this.menuItems.find(i => i.id === "item-401")  // Cold coffee
-        ],
-        comboDiscount: 40,
-        comboPrice: 168 // 79 + 129 = 208 - 40
-      });
+  /**
+   * FEATURE 27: Hackathon Demo Activity Simulator
+   */
+  simulateDemoActivity(action = 'spike_orders') {
+    if (action === 'spike_orders') {
+      const pizzaHub = this.restaurants.find(r => r.id === 'rest-pizza');
+      if (pizzaHub) pizzaHub.currentQueueOrders = 28;
+      const southKit = this.restaurants.find(r => r.id === 'rest-south');
+      if (southKit) southKit.currentQueueOrders = 8;
+      return { success: true, message: "Simulated order surge at Pizza Hub and South Kitchen." };
     }
-
-    if (hasBiryani) {
-      suggestions.push({
-        id: "rec-2",
-        title: "Royal Meal Sweet Ending",
-        reason: "Pair your Dum Biryani with warm Belgian Waffle from Dessert Lab",
-        suggestedItems: [
-          this.menuItems.find(i => i.id === "item-601") // Belgian Waffle
-        ],
-        comboDiscount: 30,
-        comboPrice: 159
-      });
-    }
-
-    // Default fallback combo
-    if (suggestions.length === 0) {
-      suggestions.push({
-        id: "rec-def",
-        title: "Food Court Signature Trio",
-        reason: "Handpicked multi-outlet favorite for first-time visitors",
-        suggestedItems: [
-          this.menuItems.find(i => i.id === "item-101"),
-          this.menuItems.find(i => i.id === "item-203"),
-          this.menuItems.find(i => i.id === "item-401")
-        ],
-        comboDiscount: 50,
-        comboPrice: 367
-      });
-    }
-
-    return suggestions;
+    return { success: true, message: "Demo activity simulated." };
   }
 }
 

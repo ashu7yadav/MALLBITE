@@ -17,7 +17,8 @@ import {
   Clock,
   CheckCircle2,
   SlidersHorizontal,
-  ArrowLeft
+  ArrowLeft,
+  Workflow
 } from 'lucide-react';
 import { useMall } from '../../context/MallContext';
 import { useCart } from '../../context/CartContext';
@@ -31,7 +32,7 @@ const SEARCH_PLACEHOLDERS = [
   'Try AI: "Pure veg quick bite in 10 mins..."'
 ];
 
-export const Header = ({ onOpenSearch, onOpenHistory, onOpenStandee, onOpenMobile, onBackToHome, showBack }) => {
+export const Header = ({ onOpenSearch, onOpenHistory, onOpenStandee, onOpenMobile, onOpenArchitecture, onBackToHome, showBack }) => {
   const { currentMall, currentTable, setIsQrScannerOpen, setIsDemoModalOpen } = useMall();
   const { totalItemsCount, cartSubtotal, setIsCartDrawerOpen } = useCart();
   const { currentRole, setCurrentRole } = useAuth();
@@ -287,6 +288,18 @@ export const Header = ({ onOpenSearch, onOpenHistory, onOpenStandee, onOpenMobil
                   title="View Mobile App Frame Simulator"
                 >
                   <span>📱 Mobile View</span>
+                </button>
+              )}
+
+              {/* Technical Architecture Modal Trigger for Judges */}
+              {onOpenArchitecture && (
+                <button
+                  onClick={onOpenArchitecture}
+                  className="hidden xl:flex items-center gap-1.5 bg-[#2A2521] hover:bg-black text-[#F3ECE0] px-3 py-2 rounded-2xl text-xs font-black transition-all hover:scale-105 active:scale-95 border border-[#3D352E] shadow-xs"
+                  title="View System Architecture & Data Pipeline"
+                >
+                  <Workflow className="w-3.5 h-3.5 text-[#F95721]" />
+                  <span>Architecture</span>
                 </button>
               )}
 

@@ -10,7 +10,10 @@ import {
   MapPin, 
   ArrowRight,
   RotateCcw,
-  Zap
+  Zap,
+  TrendingUp,
+  AlertTriangle,
+  Clock
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useMall } from '../../context/MallContext';
@@ -19,8 +22,8 @@ import { useAuth, ROLES } from '../../context/AuthContext';
 import { api } from '../../services/api';
 
 export const DemoSimulatorModal = () => {
-  const { isDemoModalOpen, setIsDemoModalOpen, currentTable, activeMasterOrder, setActiveMasterOrder, addNotification } = useMall();
-  const { addToCart, clearCart, setIsCartDrawerOpen } = useCart();
+  const { isDemoModalOpen, setIsDemoModalOpen, currentTable, activeMasterOrder, setActiveMasterOrder, addNotification, refreshData } = useMall();
+  const { clearCart } = useCart();
   const { setCurrentRole } = useAuth();
   
   const [currentStep, setCurrentStep] = useState(0);
@@ -36,51 +39,51 @@ export const DemoSimulatorModal = () => {
     });
   };
 
-  // Step 1: Preload multi-restaurant items & create order
+  // Feature 3 & 15: Create realistic Indian food court multi-store order
   const runStep1_CreateOrder = async () => {
     setCurrentStep(1);
     clearCart();
 
     const sampleItems = [
       {
-        id: "item-101",
-        restaurantId: "rest-1",
-        restaurantName: "Burger House",
-        name: "Classic Veg Crunch Burger",
-        price: 149,
-        quantity: 1,
-        isVeg: true,
-        image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop&q=80"
-      },
-      {
-        id: "item-201",
-        restaurantId: "rest-2",
-        restaurantName: "Pizza Corner",
+        id: "item-p1",
+        restaurantId: "rest-pizza",
+        restaurantName: "Pizza Hub",
         name: "Farmhouse Veggie Supreme Pizza",
-        price: 299,
+        price: 199,
         quantity: 1,
         isVeg: true,
         image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&auto=format&fit=crop&q=80"
       },
       {
-        id: "item-401",
-        restaurantId: "rest-4",
-        restaurantName: "Coffee Culture",
-        name: "Signature Iced Cold Coffee",
+        id: "item-s1",
+        restaurantId: "rest-south",
+        restaurantName: "South Kitchen",
+        name: "Crispy Masala Dosa",
         price: 129,
         quantity: 1,
         isVeg: true,
-        image: "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=600&auto=format&fit=crop&q=80"
+        image: "https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=600&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "item-j1",
+        restaurantId: "rest-juice",
+        restaurantName: "Juice Bar",
+        name: "Rich Alphonso Mango Shake",
+        price: 89,
+        quantity: 1,
+        isVeg: true,
+        image: "https://images.unsplash.com/photo-1546173159-315724a31696?w=600&auto=format&fit=crop&q=80"
       }
     ];
 
     try {
       const res = await api.createOrder({
-        tableNumber: currentTable.number || "A-24",
-        customerName: "Hackathon Judge (Table A-24)",
+        tableNumber: currentTable.number || "A17",
+        customerName: "Hackathon Judge (Table A17)",
         customerPhone: "+91 98765 43210",
         items: sampleItems,
-        paymentMethod: "UPI (Google Pay Instant)",
+        paymentMethod: "UPI (Verified)",
         couponCode: "MALLBITE50"
       });
 
@@ -89,7 +92,7 @@ export const DemoSimulatorModal = () => {
         triggerConfetti();
         addNotification(
           "Master Order Placed!",
-          `Master Order #${res.data.id} split into 3 kitchen sub-orders for Table ${currentTable.number}`,
+          `Master Order #${res.data.id} split into 3 food outlets for Table ${currentTable.number || 'A17'}`,
           "success"
         );
       }
@@ -98,75 +101,78 @@ export const DemoSimulatorModal = () => {
     }
   };
 
-  // Step 2: Kitchens start cooking
   const runStep2_KitchenPreparing = async () => {
     setCurrentStep(2);
     try {
-      await api.simulateDemoStep(1);
-      addNotification(
-        "Kitchens Started Preparing",
-        "Burger House, Pizza Corner & Coffee Culture are actively preparing your items!",
-        "info"
-      );
+      const res = await api.simulateDemoStep(1);
+      if (res.success) {
+        setActiveMasterOrder(res.order);
+        addNotification("Kitchens Fired Up 🔥", "Pizza Hub, South Kitchen & Juice Bar are preparing items", "info");
+      }
     } catch (err) {
       console.error(err);
     }
   };
 
-  // Step 3: Kitchens mark ready
-  const runStep3_FoodReady = async () => {
+  const runStep3_ReadyForPickup = async () => {
     setCurrentStep(3);
     try {
-      await api.simulateDemoStep(2);
-      addNotification(
-        "All Dishes Ready for Pickup",
-        "Food counters FC-04, FC-02 & FC-01 have marked dishes ready for runner pickup!",
-        "success"
-      );
+      const res = await api.simulateDemoStep(2);
+      if (res.success) {
+        setActiveMasterOrder(res.order);
+        addNotification("Food Ready 🔔", "All 3 kitchen tickets ready for batch runner collection", "info");
+      }
     } catch (err) {
       console.error(err);
     }
   };
 
-  // Step 4: Runner picks up
   const runStep4_RunnerPickup = async () => {
     setCurrentStep(4);
     try {
-      await api.simulateDemoStep(3);
-      addNotification(
-        "Runner Picked Up from All Counters",
-        "Rohan Verma (Runner #1) collected all 3 orders and is heading to your table.",
-        "info"
-      );
+      const res = await api.simulateDemoStep(3);
+      if (res.success) {
+        setActiveMasterOrder(res.order);
+        addNotification("Consolidated Runner Pickup 🚲", "Runner Rohan completed sequential counter pickup route", "info");
+      }
     } catch (err) {
       console.error(err);
     }
   };
 
-  // Step 5: Delivered to table
   const runStep5_Delivered = async () => {
     setCurrentStep(5);
     try {
-      await api.simulateDemoStep(5);
-      triggerConfetti();
-      addNotification(
-        "🎉 Food Arrived at Table!",
-        `All 3 food orders delivered directly to Table ${currentTable.number}! Enjoy your meal!`,
-        "success"
-      );
+      const res = await api.simulateDemoStep(5);
+      if (res.success) {
+        setActiveMasterOrder(res.order);
+        triggerConfetti();
+        addNotification("Delivered! 🎉", `Consolidated multi-outlet order delivered to Table ${currentTable.number || 'A17'}`, "success");
+      }
     } catch (err) {
       console.error(err);
     }
   };
 
-  // Auto-run complete demo
-  const runFullAutoDemo = async () => {
+  // Simulate Order Surge & Crowd Level Spike
+  const handleSimulateSurge = async () => {
+    try {
+      await api.simulateDemoActivity('spike_orders');
+      addNotification("Crowd Surge Simulated 📈", "Orders spiked! Crowd level increased to 88%, Pizza Hub queue reached 28 orders.", "info");
+      refreshData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Automated 15-second progression
+  const runAutoSimulation = async () => {
     setIsRunningAuto(true);
     await runStep1_CreateOrder();
     await new Promise(r => setTimeout(r, 2500));
     await runStep2_KitchenPreparing();
     await new Promise(r => setTimeout(r, 2500));
-    await runStep3_FoodReady();
+    await runStep3_ReadyForPickup();
     await new Promise(r => setTimeout(r, 2500));
     await runStep4_RunnerPickup();
     await new Promise(r => setTimeout(r, 2500));
@@ -175,197 +181,179 @@ export const DemoSimulatorModal = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+      <div className="bg-[#FAF7F2] rounded-3xl max-w-xl w-full shadow-2xl border border-[#EFE8DE] overflow-hidden my-auto text-left">
         
-        {/* Header */}
-        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-6 relative">
-          <button 
+        {/* Header with DEMO MODE badge */}
+        <div className="bg-[#2A2521] text-white p-5 sm:p-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[#F95721] text-white flex items-center justify-center shadow-md">
+              <Play className="w-5 h-5 fill-current" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-black font-display text-white">Hackathon Demo Mode</h3>
+                <span className="bg-amber-400 text-slate-950 text-[10px] font-black uppercase px-2 py-0.5 rounded-full">
+                  DEMO MODE
+                </span>
+              </div>
+              <p className="text-xs text-[#C5BCB2] mt-0.5">
+                Simulated real-time multi-outlet activity for judging demonstrations
+              </p>
+            </div>
+          </div>
+
+          <button
             onClick={() => setIsDemoModalOpen(false)}
-            className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-full bg-white/10"
+            className="text-slate-400 hover:text-white p-1 rounded-full bg-white/10"
           >
             <X className="w-5 h-5" />
           </button>
-
-          <div className="flex items-center gap-2 text-brand-400 text-xs font-bold uppercase tracking-wider mb-1">
-            <Zap className="w-4 h-4 fill-brand-400" />
-            Hackathon Live Evaluation Simulator
-          </div>
-          <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-            MALLBITE End-to-End Live Demo Flow
-          </h3>
-          <p className="text-xs text-slate-300 mt-1">
-            Simulate the complete customer journey: 3 Friends at <strong>Table {currentTable.number}</strong> order from 3 different restaurants in 1 cart, pay once, and get food delivered.
-          </p>
         </div>
 
-        {/* Simulator Control Area */}
-        <div className="p-6 space-y-6">
+        {/* Transparency Notice */}
+        <div className="bg-[#FFF4EC] px-5 py-2.5 border-b border-[#F6DEC9] text-[11px] text-[#6F665D] flex items-center justify-between font-bold">
+          <span>⚠️ Transparency: Demo prediction based on simulated historical food-court data.</span>
+        </div>
+
+        {/* Modal Body */}
+        <div className="p-5 sm:p-6 space-y-5">
           
-          {/* Quick Auto Play CTA */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-brand-50/80 border border-brand-200">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-brand-500 text-white flex items-center justify-center shadow-md shadow-brand-500/30">
-                <Play className="w-5 h-5 fill-white ml-0.5" />
-              </div>
+          {/* 1-Click Automated Demo Progression */}
+          <div className="bg-white p-4 rounded-2xl border border-[#EFE8DE] space-y-3">
+            <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-bold text-slate-900 text-sm">1-Click Full Automation</h4>
-                <p className="text-xs text-slate-500">Runs all 5 stages in 12 seconds with live state sync.</p>
+                <h4 className="font-black text-sm text-[#2A2521]">15-Second Complete Journey Test</h4>
+                <p className="text-xs text-[#8E857C]">Automatically steps through order creation to table delivery</p>
               </div>
+              <button
+                onClick={runAutoSimulation}
+                disabled={isRunningAuto}
+                className="bg-[#F95721] hover:bg-[#EA580C] text-white font-black text-xs px-4 py-2.5 rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-60 flex items-center gap-1.5 shrink-0"
+              >
+                <Zap className="w-4 h-4" />
+                <span>{isRunningAuto ? "Simulating..." : "Run Auto Test"}</span>
+              </button>
             </div>
-            <button
-              onClick={runFullAutoDemo}
-              disabled={isRunningAuto}
-              className="w-full sm:w-auto bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-md shadow-brand-500/25 flex items-center justify-center gap-2 transition-transform active:scale-95"
-            >
-              {isRunningAuto ? (
-                <>
-                  <RotateCcw className="w-4 h-4 animate-spin" />
-                  <span>Simulating Flow...</span>
-                </>
-              ) : (
-                <>
-                  <Zap className="w-4 h-4" />
-                  <span>Run Auto Demo</span>
-                </>
-              )}
-            </button>
+
+            {/* Stepper Progress Visualizer */}
+            <div className="grid grid-cols-5 gap-1 pt-2">
+              {[
+                { label: 'Order #MB1042', icon: ShoppingBag, stepNum: 1 },
+                { label: '3 Kitchens Prep', icon: ChefHat, stepNum: 2 },
+                { label: 'Ready for Pickup', icon: CheckCircle2, stepNum: 3 },
+                { label: 'Smart Batching', icon: Bike, stepNum: 4 },
+                { label: 'Table Delivered', icon: MapPin, stepNum: 5 }
+              ].map(s => (
+                <div
+                  key={s.stepNum}
+                  className={`p-2 rounded-xl text-center border text-[10px] font-bold transition-all ${
+                    currentStep >= s.stepNum 
+                      ? 'bg-[#EEF6EF] text-[#4E8752] border-[#D5EAD7]' 
+                      : 'bg-[#FAF7F2] text-[#8E857C] border-[#EFE8DE]'
+                  }`}
+                >
+                  <s.icon className={`w-3.5 h-3.5 mx-auto mb-1 ${currentStep >= s.stepNum ? 'text-[#4E8752]' : 'text-[#8E857C]'}`} />
+                  <span className="line-clamp-1">{s.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Interactive Step-by-Step Pipeline */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              Or Trigger Individual Steps Manually:
-            </h4>
-
-            {/* Step 1 */}
-            <div className={`p-3.5 rounded-xl border transition-all flex items-center justify-between ${currentStep >= 1 ? 'bg-emerald-50/60 border-emerald-300' : 'bg-slate-50 border-slate-200'}`}>
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${currentStep >= 1 ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-600'}`}>
-                  1
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900">Multi-Store Cart Checkout</div>
-                  <div className="text-[11px] text-slate-500">Burger House + Pizza Corner + Coffee Culture at Table {currentTable.number}</div>
-                </div>
-              </div>
+          {/* Manual Interactive Triggers */}
+          <div className="space-y-2">
+            <span className="text-xs font-black uppercase tracking-wider text-[#8E857C]">
+              Manual Simulation Triggers
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              
               <button
                 onClick={runStep1_CreateOrder}
-                className="text-xs font-bold bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 px-3 py-1.5 rounded-lg shadow-sm"
+                className="p-3 bg-white hover:bg-[#FAF7F2] border border-[#EFE8DE] rounded-xl text-left transition-all"
               >
-                Trigger Order
+                <div className="flex items-center gap-2 text-xs font-black text-[#2A2521]">
+                  <ShoppingBag className="w-4 h-4 text-[#F95721]" />
+                  <span>1. Place Multi-Outlet Order</span>
+                </div>
+                <div className="text-[11px] text-[#8E857C] mt-0.5">Pizza Hub + South Kitchen + Juice Bar (₹417)</div>
               </button>
-            </div>
 
-            {/* Step 2 */}
-            <div className={`p-3.5 rounded-xl border transition-all flex items-center justify-between ${currentStep >= 2 ? 'bg-emerald-50/60 border-emerald-300' : 'bg-slate-50 border-slate-200'}`}>
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${currentStep >= 2 ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-600'}`}>
-                  2
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900">Kitchens Start Cooking</div>
-                  <div className="text-[11px] text-slate-500">All 3 outlet kitchens receive separate sub-orders (#B782, #P491, #C221)</div>
-                </div>
-              </div>
               <button
                 onClick={runStep2_KitchenPreparing}
-                className="text-xs font-bold bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 px-3 py-1.5 rounded-lg shadow-sm"
+                className="p-3 bg-white hover:bg-[#FAF7F2] border border-[#EFE8DE] rounded-xl text-left transition-all"
               >
-                Cooking
+                <div className="flex items-center gap-2 text-xs font-black text-[#2A2521]">
+                  <ChefHat className="w-4 h-4 text-amber-500" />
+                  <span>2. Trigger Kitchens to Cook</span>
+                </div>
+                <div className="text-[11px] text-[#8E857C] mt-0.5">Sets sub-orders to 'Preparing' status</div>
               </button>
-            </div>
 
-            {/* Step 3 */}
-            <div className={`p-3.5 rounded-xl border transition-all flex items-center justify-between ${currentStep >= 3 ? 'bg-emerald-50/60 border-emerald-300' : 'bg-slate-50 border-slate-200'}`}>
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${currentStep >= 3 ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-600'}`}>
-                  3
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900">Food Ready at Counters</div>
-                  <div className="text-[11px] text-slate-500">Kitchens mark ready for runner pickup at Counters FC-04, FC-02, FC-01</div>
-                </div>
-              </div>
               <button
-                onClick={runStep3_FoodReady}
-                className="text-xs font-bold bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 px-3 py-1.5 rounded-lg shadow-sm"
+                onClick={runStep3_ReadyForPickup}
+                className="p-3 bg-white hover:bg-[#FAF7F2] border border-[#EFE8DE] rounded-xl text-left transition-all"
               >
-                Mark Ready
+                <div className="flex items-center gap-2 text-xs font-black text-[#2A2521]">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>3. Kitchens Ready for Pickup</span>
+                </div>
+                <div className="text-[11px] text-[#8E857C] mt-0.5">Counters FC-01, FC-02 & FC-03 notify runner</div>
               </button>
-            </div>
 
-            {/* Step 4 */}
-            <div className={`p-3.5 rounded-xl border transition-all flex items-center justify-between ${currentStep >= 4 ? 'bg-emerald-50/60 border-emerald-300' : 'bg-slate-50 border-slate-200'}`}>
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${currentStep >= 4 ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-600'}`}>
-                  4
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900">Runner Picked Up from All Counters</div>
-                  <div className="text-[11px] text-slate-500">Runner collects from 3 counters and heads to Table {currentTable.number}</div>
-                </div>
-              </div>
               <button
                 onClick={runStep4_RunnerPickup}
-                className="text-xs font-bold bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 px-3 py-1.5 rounded-lg shadow-sm"
+                className="p-3 bg-white hover:bg-[#FAF7F2] border border-[#EFE8DE] rounded-xl text-left transition-all"
               >
-                Runner Pickup
+                <div className="flex items-center gap-2 text-xs font-black text-[#2A2521]">
+                  <Bike className="w-4 h-4 text-blue-600" />
+                  <span>4. Synchronize Smart Batch Route</span>
+                </div>
+                <div className="text-[11px] text-[#8E857C] mt-0.5">Consolidates 3 outlets into 1 delivery batch</div>
               </button>
-            </div>
 
-            {/* Step 5 */}
-            <div className={`p-3.5 rounded-xl border transition-all flex items-center justify-between ${currentStep >= 5 ? 'bg-emerald-50/60 border-emerald-300' : 'bg-slate-50 border-slate-200'}`}>
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${currentStep >= 5 ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-600'}`}>
-                  5
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900">Delivered to Table {currentTable.number} 🎉</div>
-                  <div className="text-[11px] text-slate-500">Customer gets notification & all 3 orders arrive together</div>
-                </div>
-              </div>
               <button
                 onClick={runStep5_Delivered}
-                className="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg shadow-sm"
+                className="p-3 bg-white hover:bg-[#FAF7F2] border border-[#EFE8DE] rounded-xl text-left transition-all"
               >
-                Deliver to Table
+                <div className="flex items-center gap-2 text-xs font-black text-[#2A2521]">
+                  <MapPin className="w-4 h-4 text-purple-600" />
+                  <span>5. Drop Food at Table A17</span>
+                </div>
+                <div className="text-[11px] text-[#8E857C] mt-0.5">Completes master order #MB1042</div>
               </button>
+
+              <button
+                onClick={handleSimulateSurge}
+                className="p-3 bg-white hover:bg-[#FAF7F2] border border-[#EFE8DE] rounded-xl text-left transition-all"
+              >
+                <div className="flex items-center gap-2 text-xs font-black text-[#2A2521]">
+                  <TrendingUp className="w-4 h-4 text-rose-600" />
+                  <span>Surge Crowd & Queues</span>
+                </div>
+                <div className="text-[11px] text-[#8E857C] mt-0.5">Simulates rush hour orders spike in admin</div>
+              </button>
+
             </div>
           </div>
 
-          {/* Quick Role Switch in Modal */}
-          <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-slate-500">View live screen as:</span>
-            <div className="flex items-center gap-1.5">
-              <button 
-                onClick={() => { setCurrentRole(ROLES.CUSTOMER); setIsDemoModalOpen(false); }}
-                className="px-2.5 py-1 text-[11px] font-bold bg-emerald-100 text-emerald-800 rounded-lg hover:bg-emerald-200"
+          {/* Quick Jump to Live Tracker */}
+          {activeMasterOrder && (
+            <div className="pt-2">
+              <button
+                onClick={() => {
+                  setCurrentRole(ROLES.CUSTOMER);
+                  setIsDemoModalOpen(false);
+                }}
+                className="w-full bg-[#2A2521] hover:bg-black text-white font-black text-xs py-3 rounded-xl transition-all flex items-center justify-center gap-1.5"
               >
-                Customer Tracker
-              </button>
-              <button 
-                onClick={() => { setCurrentRole(ROLES.RESTAURANT); setIsDemoModalOpen(false); }}
-                className="px-2.5 py-1 text-[11px] font-bold bg-amber-100 text-amber-800 rounded-lg hover:bg-amber-200"
-              >
-                Kitchen Admin
-              </button>
-              <button 
-                onClick={() => { setCurrentRole(ROLES.DELIVERY); setIsDemoModalOpen(false); }}
-                className="px-2.5 py-1 text-[11px] font-bold bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200"
-              >
-                Delivery Runner
-              </button>
-              <button 
-                onClick={() => { setCurrentRole(ROLES.MALL_ADMIN); setIsDemoModalOpen(false); }}
-                className="px-2.5 py-1 text-[11px] font-bold bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200"
-              >
-                Mall Admin
+                <span>View Order #{activeMasterOrder.id} in Customer Tracker</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
-          </div>
+          )}
 
         </div>
+
       </div>
     </div>
   );

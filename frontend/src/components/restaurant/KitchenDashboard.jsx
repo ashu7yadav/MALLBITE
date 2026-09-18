@@ -136,8 +136,44 @@ export const KitchenDashboard = () => {
         </div>
       </div>
 
+      {/* Feature 4 & 12: Outlet Queue Prediction & Inventory Warnings Banner */}
+      <div className="bg-[#FFF8F2] rounded-3xl p-5 border border-[#F6DEC9] text-left flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-[#F95721] text-white flex items-center justify-center font-black">
+            <Clock className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-black uppercase tracking-wider text-[#2A2521]">
+                Queue Wait Telemetry:
+              </span>
+              <span className="bg-[#EF4444]/15 text-[#EF4444] text-[10px] font-black uppercase px-2 py-0.5 rounded-full border border-[#EF4444]/30">
+                {currentRestaurant?.id === 'rest-pizza' ? '🔴 High Queue (18m wait)' : '🟢 Normal Queue (8m wait)'}
+              </span>
+            </div>
+            <p className="text-xs text-[#6F665D] mt-0.5">
+              Active Staff: <strong>{currentRestaurant?.activeStaff || 3}</strong> • Formula: <code>(Queue × AvgPrep) / Staff</code>
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white p-3 rounded-2xl border border-[#F6DEC9] text-xs space-y-1">
+          <span className="text-[10px] font-black uppercase text-[#EF4444] flex items-center gap-1">
+            <AlertCircle className="w-3.5 h-3.5" />
+            <span>Inventory Alert</span>
+          </span>
+          <p className="text-[11px] text-[#2A2521] font-bold">
+            {currentRestaurant?.id === 'rest-pizza' 
+              ? '⚠️ Pizza dough bases running low for 7:30 PM rush'
+              : currentRestaurant?.id === 'rest-burger'
+              ? '⚠️ Paneer portions low. Recommended: Prep +20 wraps'
+              : '✓ Ingredient inventory healthy'}
+          </p>
+        </div>
+      </div>
+
       {/* KPI Cards (Matches PRD Section 13) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-left">
         <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-soft">
           <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Today's Orders</span>
           <div className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">

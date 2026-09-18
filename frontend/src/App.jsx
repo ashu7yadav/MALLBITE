@@ -19,6 +19,10 @@ import { TrustAndDeliveryBanners } from './components/customer/TrustAndDeliveryB
 import { HowItWorksSteps } from './components/customer/HowItWorksSteps';
 import { QrStandeeModal } from './components/customer/QrStandeeModal';
 import { MobileDeviceSimulator } from './components/customer/MobileDeviceSimulator';
+import { AiFoodRecommendationModal } from './components/customer/AiFoodRecommendationModal';
+import { SmartAlternativeModal } from './components/customer/SmartAlternativeModal';
+import { FoodComparisonModal } from './components/customer/FoodComparisonModal';
+import { ArchitectureModal } from './components/common/ArchitectureModal';
 
 // Standard Sub-components
 import { RestaurantCard } from './components/customer/RestaurantCard';
@@ -36,7 +40,7 @@ import { MallDashboard } from './components/mall_admin/MallDashboard';
 import { DeliveryDashboard } from './components/delivery/DeliveryDashboard';
 import { LandingPage } from './components/landing/LandingPage';
 
-import { Sparkles, Star, Flame, Filter, Zap, ArrowRight, CheckCircle2, QrCode, Smartphone, ArrowLeft } from 'lucide-react';
+import { Sparkles, Star, Flame, Filter, Zap, ArrowRight, CheckCircle2, QrCode, Smartphone, ArrowLeft, Scale, Workflow } from 'lucide-react';
 
 const CustomerHub = ({ 
   onOpenSearch, 
@@ -46,10 +50,15 @@ const CustomerHub = ({
   customerView, 
   setCustomerView,
   onOpenStandee,
-  onOpenMobile
+  onOpenMobile,
+  onOpenAiModal,
+  onOpenCompareModal,
+  onOpenArchitecture,
+  onTriggerAlternative
 }) => {
   const { restaurants, currentTable } = useMall();
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedMaxWait, setSelectedMaxWait] = useState(null);
   const [filterType, setFilterType] = useState('all'); // all | veg | rating
 
   const handleSelectRestaurant = (rest) => {
@@ -94,13 +103,18 @@ const CustomerHub = ({
   return (
     <div className="space-y-9 animate-in fade-in duration-300">
       
-      {/* 1. Hero Banner: "One QR. Unlimited Choices." with 50% OFF Badge & Organic Seal */}
-      <MallBiteHero onExploreClick={() => {
-        const el = document.getElementById('recommended-grid');
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-      }} />
+      {/* 1. Hero Banner: "One QR. Unlimited Choices." with 50% OFF Badge, AI Advisor & Compare Food Triggers */}
+      <MallBiteHero 
+        onExploreClick={() => {
+          const el = document.getElementById('recommended-grid');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }}
+        onOpenAiModal={onOpenAiModal}
+        onOpenCompareModal={onOpenCompareModal}
+        onOpenStandee={onOpenStandee}
+      />
 
-      {/* 2. Popular Outlets Row (Circular Outlets Avatars with ratings) */}
+      {/* 2. Popular Outlets Row (Live color-coded queue status badges & wait times) */}
       <PopularOutletsRow
         onSelectOutlet={(outlet) => {
           const match = restaurants.find(r => r.name.toLowerCase().includes(outlet.name.toLowerCase().split(' ')[0])) || restaurants[0];
@@ -112,15 +126,22 @@ const CustomerHub = ({
         }}
       />
 
-      {/* 3. "What would you like to eat?" Category Filter Pills */}
+      {/* 3. "What would you like to eat?" Category Filter Pills + Wait Time Limits */}
       <WhatWouldYouLikeToEat
         selectedCategory={selectedCategory}
         onSelectCategory={(cat) => setSelectedCategory(cat)}
+        selectedMaxWait={selectedMaxWait}
+        onSelectMaxWait={(time) => setSelectedMaxWait(time)}
+        onOpenAiRecommend={onOpenAiModal}
       />
 
-      {/* 4. "Recommended for you" Dish Cards Grid (Exact match to design) */}
+      {/* 4. "Recommended for you" Dish Cards Grid (With AI Alternative swap trigger on busy queues) */}
       <div id="recommended-grid">
-        <RecommendedDishesGrid selectedCategory={selectedCategory} />
+        <RecommendedDishesGrid 
+          selectedCategory={selectedCategory} 
+          selectedMaxWait={selectedMaxWait}
+          onTriggerAlternative={onTriggerAlternative}
+        />
       </div>
 
       {/* 5. Trust Badges & Delivery Runner Banner */}
@@ -129,7 +150,7 @@ const CustomerHub = ({
       {/* 6. "HOW IT WORKS" 5-Step Visual Workflow */}
       <HowItWorksSteps />
 
-      {/* Floating Quick Action Widget for Table Standee & Mobile Preview */}
+      {/* Floating Quick Action Widget for Table Standee, Mobile Preview & Hackathon Architecture */}
       <div className="bg-[#FFF4EC] border border-[#F6DEC9] rounded-3xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-[#F95721] text-white flex items-center justify-center shrink-0 shadow-md shadow-[#F95721]/20">
@@ -137,28 +158,35 @@ const CustomerHub = ({
           </div>
           <div className="text-left">
             <h4 className="text-sm font-black text-[#2A2521] font-display">
-              Acrylic Table Standee & Mobile Simulator
+              Physical Table Standee & Judge Showcase
             </h4>
             <p className="text-xs text-[#6F665D]">
-              Preview the physical table tent standee or test the app in interactive iPhone 15 frame.
+              Preview the acrylic table tent QR standee, test phone frames, or view technical architecture.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <button
             onClick={onOpenStandee}
-            className="flex items-center gap-2 bg-[#F95721] hover:bg-[#EA580C] text-white text-xs font-black py-2.5 px-4 rounded-xl shadow-md shadow-[#F95721]/25 transition-all font-display"
+            className="flex items-center gap-2 bg-[#F95721] hover:bg-[#EA580C] text-white text-xs font-black py-2.5 px-3.5 rounded-xl shadow-md shadow-[#F95721]/25 transition-all font-display"
           >
             <QrCode className="w-4 h-4" />
             <span>Table Standee</span>
           </button>
           <button
             onClick={onOpenMobile}
-            className="flex items-center gap-2 bg-white hover:bg-[#FAF7F2] text-[#2A2521] text-xs font-black py-2.5 px-4 rounded-xl border border-[#EFE8DE] shadow-xs transition-all font-display"
+            className="flex items-center gap-2 bg-white hover:bg-[#FAF7F2] text-[#2A2521] text-xs font-black py-2.5 px-3 rounded-xl border border-[#EFE8DE] shadow-xs transition-all font-display"
           >
             <Smartphone className="w-4 h-4 text-[#F95721]" />
-            <span>Mobile Preview</span>
+            <span>Mobile</span>
+          </button>
+          <button
+            onClick={onOpenArchitecture}
+            className="flex items-center gap-2 bg-[#2A2521] hover:bg-black text-[#F3ECE0] text-xs font-black py-2.5 px-3.5 rounded-xl shadow-md shadow-[#2A2521]/20 transition-all font-display"
+          >
+            <Workflow className="w-4 h-4 text-[#F95721]" />
+            <span>Architecture</span>
           </button>
         </div>
       </div>
@@ -233,13 +261,29 @@ const CustomerHub = ({
 };
 
 const MainAppContent = () => {
-  const { currentRole } = useAuth();
+  const { currentRole, setCurrentRole } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isStandeeModalOpen, setIsStandeeModalOpen] = useState(false);
   const [isMobileSimulatorOpen, setIsMobileSimulatorOpen] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
+  const [isArchModalOpen, setIsArchModalOpen] = useState(false);
+  const [isAltModalOpen, setIsAltModalOpen] = useState(false);
+  const [altTargetItem, setAltTargetItem] = useState(null);
+  const [altList, setAltList] = useState([]);
+  const [altTargetWait, setAltTargetWait] = useState(22);
+  const [altUserMaxWait, setAltUserMaxWait] = useState(15);
   const [customerView, setCustomerView] = useState('home'); // home | restaurant | tracker | history
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [activeNav, setActiveNav] = useState('home');
+
+  const handleTriggerAlternative = (dish, fasterList, targetWait, userMaxWait) => {
+    setAltTargetItem(dish);
+    setAltList(fasterList || []);
+    setAltTargetWait(targetWait || 22);
+    setAltUserMaxWait(userMaxWait || 15);
+    setIsAltModalOpen(true);
+  };
 
   return (
     <div className="min-h-screen flex bg-[#FAF7F2] text-[#2D2620]">
@@ -252,6 +296,8 @@ const MainAppContent = () => {
             setActiveNav(navId);
             if (navId === 'home') setCustomerView('home');
             else if (navId === 'orders') setCustomerView('history');
+            else if (navId === 'ai-advisor') setIsAiModalOpen(true);
+            else if (navId === 'compare') setIsCompareModalOpen(true);
             else if (navId === 'outlets') {
               setCustomerView('home');
               const el = document.getElementById('restaurants-grid');
@@ -259,6 +305,9 @@ const MainAppContent = () => {
             }
           }}
           onOpenStandee={() => setIsStandeeModalOpen(true)}
+          onOpenAiModal={() => setIsAiModalOpen(true)}
+          onOpenCompareModal={() => setIsCompareModalOpen(true)}
+          onOpenArchitecture={() => setIsArchModalOpen(true)}
           onExploreClick={() => {
             const el = document.getElementById('recommended-grid');
             if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -297,6 +346,7 @@ const MainAppContent = () => {
           onOpenHistory={() => setCustomerView('history')}
           onOpenStandee={() => setIsStandeeModalOpen(true)}
           onOpenMobile={() => setIsMobileSimulatorOpen(true)}
+          onOpenArchitecture={() => setIsArchModalOpen(true)}
           onBackToHome={() => {
             setCustomerView('home');
             setCurrentRole(ROLES.CUSTOMER);
@@ -321,6 +371,10 @@ const MainAppContent = () => {
               setCustomerView={setCustomerView}
               onOpenStandee={() => setIsStandeeModalOpen(true)}
               onOpenMobile={() => setIsMobileSimulatorOpen(true)}
+              onOpenAiModal={() => setIsAiModalOpen(true)}
+              onOpenCompareModal={() => setIsCompareModalOpen(true)}
+              onOpenArchitecture={() => setIsArchModalOpen(true)}
+              onTriggerAlternative={handleTriggerAlternative}
             />
           )}
         </main>
@@ -333,6 +387,20 @@ const MainAppContent = () => {
       <QrScannerModal />
       <QrStandeeModal isOpen={isStandeeModalOpen} onClose={() => setIsStandeeModalOpen(false)} />
       <MobileDeviceSimulator isOpen={isMobileSimulatorOpen} onClose={() => setIsMobileSimulatorOpen(false)} />
+      
+      {/* Hackathon AI & Innovation Modals */}
+      <AiFoodRecommendationModal isOpen={isAiModalOpen} onClose={() => setIsAiModalOpen(false)} />
+      <SmartAlternativeModal
+        isOpen={isAltModalOpen}
+        onClose={() => setIsAltModalOpen(false)}
+        selectedItem={altTargetItem}
+        alternatives={altList}
+        targetWait={altTargetWait}
+        userMaxWait={altUserMaxWait}
+      />
+      <FoodComparisonModal isOpen={isCompareModalOpen} onClose={() => setIsCompareModalOpen(false)} />
+      <ArchitectureModal isOpen={isArchModalOpen} onClose={() => setIsArchModalOpen(false)} />
+      
       <DemoSimulatorModal />
       <NotificationToast />
 

@@ -14,7 +14,9 @@ import {
   Sparkles,
   QrCode,
   Store,
-  Layers
+  Layers,
+  Scale,
+  Workflow
 } from 'lucide-react';
 import { useMall } from '../../context/MallContext';
 import { useAuth, ROLES } from '../../context/AuthContext';
@@ -23,15 +25,19 @@ export const MallBiteSidebar = ({
   activeNav = 'home', 
   onSelectNav, 
   onOpenStandee, 
-  onExploreClick 
+  onExploreClick,
+  onOpenAiModal,
+  onOpenCompareModal,
+  onOpenArchitecture
 }) => {
   const { currentMall, currentTable, setIsQrScannerOpen, allMalls, switchMall, addNotification } = useMall();
   const { currentRole, setCurrentRole } = useAuth();
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Home },
+    { id: 'ai-advisor', label: 'AI Food Advisor', icon: Sparkles, badge: 'AI' },
+    { id: 'compare', label: 'Compare Food', icon: Scale, badge: 'NEW' },
     { id: 'outlets', label: 'All Outlets', icon: Store },
-    { id: 'menu', label: 'Menu', icon: BookOpen },
     { id: 'offers', label: 'Offers', icon: Tag, badge: '50% OFF' },
     { id: 'orders', label: 'Orders', icon: ShoppingBag },
     { id: 'favorites', label: 'Favorites', icon: Heart },
@@ -82,6 +88,10 @@ export const MallBiteSidebar = ({
                 onClick={() => {
                   if (item.id === 'tableservice') {
                     handleTableServiceRequest();
+                  } else if (item.id === 'ai-advisor' && onOpenAiModal) {
+                    onOpenAiModal();
+                  } else if (item.id === 'compare' && onOpenCompareModal) {
+                    onOpenCompareModal();
                   } else if (onSelectNav) {
                     onSelectNav(item.id);
                   }
@@ -180,6 +190,17 @@ export const MallBiteSidebar = ({
           >
             <QrCode className="w-3.5 h-3.5" />
             <span>View Table Standee QR</span>
+          </button>
+        )}
+
+        {/* View Technical Architecture Pipeline */}
+        {onOpenArchitecture && (
+          <button
+            onClick={onOpenArchitecture}
+            className="w-full flex items-center justify-center gap-2 bg-[#2A2521] hover:bg-black text-[#F3ECE0] font-bold text-xs py-2 rounded-xl border border-[#3D352E] transition-all shadow-xs"
+          >
+            <Workflow className="w-3.5 h-3.5 text-[#F95721]" />
+            <span>Tech Architecture (Judges)</span>
           </button>
         )}
 

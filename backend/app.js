@@ -216,9 +216,52 @@ app.get("/api/mall/analytics", (req, res) => {
 
 // --- AI Endpoints ---
 app.post("/api/ai/recommend", (req, res) => {
-  const { cartItems } = req.body;
-  const recommendations = dataStore.getAIRecommendations(cartItems || []);
-  res.json({ success: true, data: recommendations });
+  const { preferences, cartItems } = req.body;
+  if (preferences) {
+    const recommendations = dataStore.getAIRecommendations(preferences);
+    return res.json({ success: true, count: recommendations.length, data: recommendations });
+  }
+  // Backwards compatibility fallback
+  const recommendations = dataStore.getAIRecommendations({});
+  res.json({ success: true, count: recommendations.length, data: recommendations });
+});
+
+app.get("/api/ai/queue-status", (req, res) => {
+  const queues = dataStore.getOutletQueues();
+  res.json({ success: true, data: queues });
+});
+
+app.post("/api/ai/alternatives", (req, res) => {
+  const { itemId, maxWait } = req.body;
+  const result = dataStore.getFasterAlternatives(itemId, Number(maxWait) || 15);
+  res.json({ success: true, data: result });
+});
+
+app.get("/api/ai/smart-batch/:orderId", (req, res) => {
+  const batch = dataStore.getSmartBatch(req.params.orderId);
+  res.json({ success: true, data: batch });
+});
+
+// --- Mall Admin AI Intelligence Endpoints ---
+app.get("/api/admin/crowd-intelligence", (req, res) => {
+  const forecast = dataStore.getCrowdAndDemandForecast();
+  res.json({ success: true, data: forecast });
+});
+
+app.get("/api/admin/demand-forecast", (req, res) => {
+  const forecast = dataStore.getCrowdAndDemandForecast();
+  res.json({ success: true, data: forecast });
+});
+
+app.get("/api/admin/inventory-signals", (req, res) => {
+  const signals = dataStore.getInventorySignals();
+  res.json({ success: true, data: signals });
+});
+
+app.post("/api/demo/simulate-activity", (req, res) => {
+  const { action } = req.body;
+  const result = dataStore.simulateDemoActivity(action);
+  res.json({ success: true, data: result });
 });
 
 app.post("/api/ai/smart-search", (req, res) => {
@@ -233,13 +276,13 @@ app.post("/api/ai/smart-search", (req, res) => {
 
   const isSpicy = q.includes("spicy") || q.includes("hot") || q.includes("fiery") || q.includes("chili");
   const isVegQuery = q.includes("veg") && !q.includes("non-veg") && !q.includes("nonveg");
-  const isSweet = q.includes("sweet") || q.includes("dessert") || q.includes("chocolate") || q.includes("cake");
+  const isSweet = q.includes("sweet") || q.includes("dessert") || q.includes("chocolate") || q.includes("cake") || q.includes("shake");
 
   let results = dataStore.getMenuItems().filter(item => {
     if (item.price > maxBudget) return false;
     if (isVegQuery && !item.isVeg) return false;
     if (isSpicy && !(item.description.toLowerCase().includes("spic") || item.description.toLowerCase().includes("peri") || item.description.toLowerCase().includes("chili") || item.name.toLowerCase().includes("spicy"))) return false;
-    if (isSweet && item.restaurantId !== "rest-6" && !item.category.toLowerCase().includes("dessert")) return false;
+    if (isSweet && !item.category.toLowerCase().includes("dessert") && !item.category.toLowerCase().includes("shake")) return false;
     return true;
   });
 

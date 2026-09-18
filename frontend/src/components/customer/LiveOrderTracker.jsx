@@ -161,60 +161,118 @@ export const LiveOrderTracker = ({ onBackToHome }) => {
         )}
       </div>
 
-      {/* Breakdown of Individual Outlet Sub-Orders (The Core Innovation!) */}
-      <div>
+      {/* FEATURE 7: SMART ORDER BATCHING CARD */}
+      <div className="bg-gradient-to-br from-[#FFF4EC] via-[#FAF4EB] to-white rounded-3xl p-5 sm:p-6 border border-[#F6DEC9] shadow-xs text-left space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="bg-[#F95721] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-xs">
+              Smart Batch #{order.smartBatch?.batchId || "B204"}
+            </span>
+            <span className="text-xs font-black text-[#2A2521]">
+              {order.subOrders ? order.subOrders.length : 3} outlets ➔ 1 delivery
+            </span>
+          </div>
+          <span className="text-xs font-bold text-[#F95721] bg-white px-2.5 py-1 rounded-xl border border-[#F6DEC9]">
+            ⏱️ Target Pickup Window: {order.smartBatch?.recommendedPickupWindow || "12 minutes"}
+          </span>
+        </div>
+
+        <p className="text-xs text-[#6F665D] leading-relaxed">
+          Instead of dispatching multiple individual delivery trips, MallBite synchronizes kitchen readiness and consolidates your multi-outlet meal into one optimized runner pickup route.
+        </p>
+
+        {/* Pickup Route Visualization */}
+        <div className="bg-white p-3.5 rounded-2xl border border-[#F6DEC9] space-y-1.5">
+          <span className="text-[10px] font-black uppercase tracking-wider text-[#8E857C] block">
+            Optimized Runner Route
+          </span>
+          <div className="text-xs font-black text-[#2A2521] flex items-center gap-1.5 flex-wrap">
+            {order.smartBatch?.optimizedRouteString ? (
+              <span>{order.smartBatch.optimizedRouteString}</span>
+            ) : (
+              <span>Juice Bar (FC-01) ➔ South Kitchen (FC-03) ➔ Pizza Hub (FC-02) ➔ Deliver to Table {order.tableNumber || "A17"}</span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Breakdown of Individual Outlet Sub-Orders (Feature 6 & 7) */}
+      <div className="text-left">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">
             Split Kitchen Orders ({order.subOrders ? order.subOrders.length : 0})
           </h3>
-          <span className="text-xs font-bold text-slate-500">Auto-synchronized in real-time</span>
+          <span className="text-xs font-bold text-[#F95721] bg-[#FFF2EB] px-2.5 py-0.5 rounded-full border border-[#F6DEC9]">
+            Real-time Sub-Order Sync
+          </span>
         </div>
 
         <div className="space-y-3">
           {order.subOrders && order.subOrders.map((sub) => {
-            const isSubReady = sub.status === "Ready for Pickup" || sub.status === "Picked Up" || sub.status === "Delivered";
+            const isReady = sub.status === "Ready for Pickup" || sub.status === "Ready" || sub.status === "Picked Up" || sub.status === "Delivered";
+            const isPreparing = sub.status === "Preparing" || isReady;
 
             return (
               <div
                 key={sub.id}
-                className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm"
+                className="bg-white rounded-2xl border border-[#EFE8DE] p-4 shadow-xs space-y-3"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-black text-xs border border-slate-200">
+                    <div className="w-10 h-10 rounded-xl bg-[#FFF4EC] text-[#F95721] flex items-center justify-center font-black text-xs border border-[#F6DEC9]">
                       {sub.counterNumber || "FC"}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h4 className="font-extrabold text-sm text-slate-900">{sub.restaurantName}</h4>
-                        <span className="text-xs font-bold text-slate-400">#{sub.id}</span>
+                        <h4 className="font-extrabold text-sm text-[#2A2521] font-display">{sub.restaurantName}</h4>
+                        <span className="text-xs font-bold text-[#8E857C]">#{sub.id}</span>
                       </div>
-                      <span className="text-xs text-slate-500 font-medium">
-                        {sub.items.length} items • Counter {sub.counterNumber}
+                      <span className="text-xs text-[#6F665D] font-medium">
+                        {sub.items.length} items • Counter {sub.counterNumber} • Est: {sub.estimatedTime || "10m"}
                       </span>
                     </div>
                   </div>
 
                   {/* Status badge */}
                   <div className="text-right">
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-extrabold shadow-sm ${
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-extrabold shadow-xs ${
                       sub.status === "Delivered" 
-                        ? 'bg-emerald-100 text-emerald-800' 
-                        : isSubReady 
-                        ? 'bg-blue-100 text-blue-800 animate-pulse' 
-                        : 'bg-amber-100 text-amber-800'
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
+                        : isReady 
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 animate-pulse' 
+                        : 'bg-amber-50 text-amber-800 border border-amber-200'
                     }`}>
                       {sub.status}
                     </span>
                   </div>
                 </div>
 
+                {/* Per-Outlet Step Checkmarks: Order Received ✓ Preparing ✓ Ready ○ */}
+                <div className="bg-[#FAF7F2] p-2.5 rounded-xl border border-[#EFE8DE] flex items-center justify-between text-[11px] font-extrabold text-[#6F665D]">
+                  <span className="text-emerald-700 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Order Received</span>
+                  </span>
+                  <span className="text-[#C5BCB2]">➔</span>
+                  <span className={`flex items-center gap-1 ${isPreparing ? 'text-emerald-700' : 'text-[#8E857C]'}`}>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Preparing</span>
+                  </span>
+                  <span className="text-[#C5BCB2]">➔</span>
+                  <span className={`flex items-center gap-1 ${isReady ? 'text-emerald-700' : 'text-[#8E857C]'}`}>
+                    <span className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${isReady ? 'border-emerald-700 bg-emerald-700 text-white' : 'border-slate-300'}`}>
+                      {isReady ? '✓' : ''}
+                    </span>
+                    <span>Ready</span>
+                  </span>
+                </div>
+
                 {/* Sub-order items list */}
-                <div className="mt-3 pt-3 border-t border-slate-100 text-xs space-y-1.5">
+                <div className="pt-2 border-t border-[#FAF4EB] text-xs space-y-1.5">
                   {sub.items.map((it, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-slate-700 font-medium">
+                    <div key={idx} className="flex items-center justify-between text-[#6F665D] font-medium">
                       <span>{it.quantity} × {it.name}</span>
-                      <span className="font-bold text-slate-900">₹{it.price * it.quantity}</span>
+                      <span className="font-bold text-[#2A2521]">₹{it.price * it.quantity}</span>
                     </div>
                   ))}
                 </div>

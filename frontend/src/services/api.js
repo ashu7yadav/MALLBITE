@@ -169,12 +169,40 @@ export const api = {
   },
 
   // AI
-  getAIRecommendations: async (cartItems) => {
+  getAIRecommendations: async (preferences = {}) => {
     const res = await fetch(`${API_BASE}/ai/recommend`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cartItems })
+      body: JSON.stringify({ preferences })
     });
+    return res.json();
+  },
+  getOutletQueues: async () => {
+    const res = await fetch(`${API_BASE}/ai/queue-status`);
+    return res.json();
+  },
+  getFasterAlternatives: async (itemId, maxWait = 15) => {
+    const res = await fetch(`${API_BASE}/ai/alternatives`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ itemId, maxWait })
+    });
+    return res.json();
+  },
+  getSmartBatch: async (orderId) => {
+    const res = await fetch(`${API_BASE}/ai/smart-batch/${orderId}`);
+    return res.json();
+  },
+  getCrowdIntelligence: async () => {
+    const res = await fetch(`${API_BASE}/admin/crowd-intelligence`);
+    return res.json();
+  },
+  getDemandForecast: async () => {
+    const res = await fetch(`${API_BASE}/admin/demand-forecast`);
+    return res.json();
+  },
+  getInventorySignals: async () => {
+    const res = await fetch(`${API_BASE}/admin/inventory-signals`);
     return res.json();
   },
   smartSearch: async (prompt) => {
@@ -192,6 +220,14 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ step })
+    });
+    return res.json();
+  },
+  simulateDemoActivity: async (action) => {
+    const res = await fetch(`${API_BASE}/demo/simulate-activity`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action })
     });
     return res.json();
   }
